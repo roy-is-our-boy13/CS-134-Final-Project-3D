@@ -96,6 +96,22 @@ void ofApp::setup(){
 
 	testBox = Box(Vector3(3, 3, 0), Vector3(5, 5, 2));
 
+
+	// Emitters
+	// 
+
+	landerParticle.setRate(rate); //?? landerParticle is the particle we'll be using to control the lander
+								// we can test this by treating this as a normal particle emitter and connecting lander position to it?
+	landerParticle.setOneShot(true);
+
+	landerParticle.start();
+	landerParticle.setLifespan(10);
+
+	ParticleSystem* sys = landerParticle.sys;
+	grav.set(ofVec3f(0, -1.0, 0));
+	sys->addForce(&grav);
+	sys->addForce(new TurbulenceForce(ofVec3f(-3, -1, -1), ofVec3f(3, 1, 1)));
+
 }
 
 //	FROM: examples/particleBouncingBall, written by prof. smith
@@ -136,7 +152,17 @@ void ofApp::checkCollisions() {
 // incrementally update scene (animation)
 //
 void ofApp::update() {
-	
+
+	// for the lander movement
+	grav.set(ofVec3f(0, -gravity, 0));
+	landerParticle.setParticleRadius(radius);
+
+	// get velocity from slider
+	glm::vec3 v = velocity;
+	landerParticle.setVelocity(v);
+	//
+	// update objects you've created here
+	landerParticle.update();
 }
 //--------------------------------------------------------------
 void ofApp::draw() {
@@ -149,8 +175,6 @@ void ofApp::draw() {
 
 	// cam.begin();
 	theCam->begin(); 
-
-	
 
 
 	ofPushMatrix();
@@ -243,6 +267,11 @@ void ofApp::draw() {
 		ofSetColor(ofColor::lightGreen);
 		ofDrawSphere(p, .02 * d.length());
 	}
+
+	//
+	// draw any other objects here...
+	//
+	landerParticle.draw(); //particle(?) for the lander movement
 
 	ofPopMatrix();
 	
@@ -353,6 +382,9 @@ void ofApp::keyPressed(int key) {
 		break;
 	case OF_KEY_F3:
 		theCam = &cam2;
+		break;
+	case ' ':				// release a particle
+		landerParticle.start();
 		break;
 	default:
 		break;

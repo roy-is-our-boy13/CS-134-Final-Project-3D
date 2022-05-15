@@ -63,7 +63,7 @@ class ofApp : public ofBaseApp{
 
 
 		//** Particle system and gravity start **//
-			ParticleEmitter emitter;
+			ParticleEmitter landerParticle;
 
 			GravityForce grav;
 			ImpulseForce impulse;  // test for collisions;
