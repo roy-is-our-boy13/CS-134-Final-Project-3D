@@ -46,7 +46,10 @@ class ofApp : public ofBaseApp{
 		glm::vec3 ofApp::getMousePointOnPlane(glm::vec3 p , glm::vec3 n);
 		void devMode(); 
 
-		ofEasyCam cam;
+		ofEasyCam cam; // this is the main camera
+		ofCamera cam1, cam2; // these are the other camera views
+		ofCamera* theCam;
+
 		ofxAssimpModelLoader mars, lander;
 		ofLight light;
 		Box boundingBox, landerBounds;
@@ -67,14 +70,16 @@ class ofApp : public ofBaseApp{
 		//** Particle system and gravity end **//
 
 		bool bHide;
-			ofxIntSlider numLevels;
-			ofxFloatSlider gravity;
-			ofxFloatSlider damping;
-			ofxFloatSlider radius;
-			ofxVec3Slider velocity;
-			ofxFloatSlider lifespan;
-			ofxFloatSlider rate;
-			ofxFloatSlider restitution;
+			ofxIntSlider numLevels;	// octree levels
+			ofxFloatSlider gravity;	// strength of the gravity
+			ofxFloatSlider damping;	// resistance force?
+			ofxFloatSlider radius;	// radius of the particles
+			ofxVec3Slider velocity;	// velocity of the particles TODO: change this to be the velocity of the ship? (no, change the thrust instead bc cant directly change velocity)
+			ofxFloatSlider lifespan;	// lifespan of the particles
+			ofxFloatSlider rate;	// particle spawn rate
+			ofxFloatSlider restitution;	// bounceback
+
+			ofxFloatSlider camDistance; // this is the distance of the current camera view
 		ofxPanel gui;
 		
 

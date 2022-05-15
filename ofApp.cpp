@@ -26,14 +26,26 @@ void ofApp::setup(){
 	bLanderLoaded = false;
 	bTerrainSelected = true;
 //	ofSetWindowShape(1024, 768);
+// 
 	//TODO: What do we want the intial camera distance to be?
 	cam.setDistance(75);
-	cam.setNearClip(.1);
+
+	//TODO: this has a weird reaction to having the different cameras
+	//cam.setNearClip(.1);
 	cam.setFov(65.5);   // approx equivalent to 28mm in 35mm format
 	ofSetVerticalSync(true);
 	cam.disableMouseInput();
 	ofEnableSmoothing();
 	ofEnableDepthTest();
+
+	theCam = &cam; // referencing the main camera
+
+	cam1.setGlobalPosition(glm::vec3(100, 0, 0));
+	cam1.lookAt(glm::vec3(0, 0, 0));
+
+	cam2.setGlobalPosition(glm::vec3(0, 150, 0));
+	cam2.lookAt(glm::vec3(0, 0, 0));
+
 
 	// setup rudimentary lighting 
 	//
@@ -118,7 +130,12 @@ void ofApp::draw() {
 	if (!bHide) gui.draw();
 	glDepthMask(true);
 
-	cam.begin();
+	// cam.begin();
+	theCam->begin(); 
+
+	
+
+
 	ofPushMatrix();
 	if (bWireframe) {                    // wireframe mode  (include axis)
 		ofDisableLighting();
@@ -211,7 +228,14 @@ void ofApp::draw() {
 	}
 
 	ofPopMatrix();
-	cam.end();
+	
+	//TODO: draw these?
+	/*cam.draw();
+	cam1.draw();
+	cam2.draw();*/
+
+	theCam->end();
+	// cam.end();
 }
 
 
@@ -303,6 +327,15 @@ void ofApp::keyPressed(int key) {
 	case OF_KEY_SHIFT:
 		break;
 	case OF_KEY_DEL:
+		break;
+	case OF_KEY_F1:
+		theCam = &cam;
+		break;
+	case OF_KEY_F2:
+		theCam = &cam1;
+		break;
+	case OF_KEY_F3:
+		theCam = &cam2;
 		break;
 	default:
 		break;
