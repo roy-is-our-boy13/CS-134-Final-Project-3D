@@ -54,6 +54,23 @@ void ofApp::setup(){
 	mars.loadModel("geo/mars-low-5x-v2.obj");
 	mars.setScaleNormalization(false);
 
+
+	//Loading lander without drag+drop
+	if (lander.loadModel("geo/lander.obj"))
+	{
+		lander.setScaleNormalization(false);
+		//		lander.setScale(.1, .1, .1);
+			//	lander.setPosition(point.x, point.y, point.z);
+		lander.setPosition(1, 1, 0);
+
+		bLanderLoaded = true;
+		for (int i = 0; i < lander.getMeshCount(); i++) {
+			bboxList.push_back(Octree::meshBounds(lander.getMesh(i)));
+		}
+
+		cout << "Mesh Count: " << lander.getMeshCount() << endl;
+	}
+
 	// create sliders for testing
 	//
 	gui.setup();
