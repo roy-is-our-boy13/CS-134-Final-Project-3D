@@ -18,12 +18,8 @@
 
 class Box {
   public:
-    Box() 
-	{
-
-	}
-    Box(const Vector3 &min, const Vector3 &max) 
-	{
+    Box() { }
+    Box(const Vector3 &min, const Vector3 &max) {
  //     assert(min < max);
       parameters[0] = min;
       parameters[1] = max;
@@ -34,31 +30,18 @@ class Box {
     // corners
     Vector3 parameters[2];
 
-	Vector3 min()
-	{
-		return parameters[0]; 
-	}
+	Vector3 min() { return parameters[0]; }
+	Vector3 max() { return parameters[1]; }
 
-	Vector3 max() 
-	{ 
-		return parameters[1]; 
-	}
-
-	const bool inside(const Vector3 &p) 
-	{
+	const bool inside(const Vector3 &p) {
 		return ((p.x() >= parameters[0].x() && p.x() <= parameters[1].x()) &&
-		     		(p.y() >= parameters[0].y() && p.y() <= parameters[1].y()) &&
-						(p.z() >= parameters[0].z() && p.z() <= parameters[1].z()));
+		     	(p.y() >= parameters[0].y() && p.y() <= parameters[1].y()) &&
+			    (p.z() >= parameters[0].z() && p.z() <= parameters[1].z()));
 	}
-	const bool inside(Vector3 *points, int size) 
-	{
+	const bool inside(Vector3 *points, int size) {
 		bool allInside = true;
-		for (int i = 0; i < size; i++) 
-		{
-			if (!inside(points[i])) 
-			{ 
-				allInside = false; 
-			}
+		for (int i = 0; i < size; i++) {
+			if (!inside(points[i])) allInside = false;
 			break;
 		}
 		return allInside;
@@ -93,28 +76,9 @@ class Box {
 		 return isOverlapping;
 	}
 
-	 //This centers the box
-	Vector3 center() 
-	{
+	Vector3 center() {
 		return ((max() - min()) / 2 + min());
 	}
-
-	float length()//Roy Perlman
-	{
-		return ((max() - min()).x());
-	}
-
-	float height()//Roy Perlman
-	{
-		return ((max() - min()).y());
-	}
-
-	float width()//Roy Perlman
-	{
-		return((max() - min()).z());
-	}
-
-
 };
 
 #endif // _BOX_H_

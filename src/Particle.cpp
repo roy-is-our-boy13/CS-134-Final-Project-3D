@@ -1,40 +1,40 @@
 #include "Particle.h"
 
 
-Particle::Particle()
-{
+Particle::Particle() {
 
 	// initialize particle with some reasonable values first;
 	//
 	velocity.set(0, 0, 0);
 	acceleration.set(0, 0, 0);
-	position.set(50, 50, -50);
+	position.set(0, 0, 0);
 	forces.set(0, 0, 0);
 	lifespan = 5;
 	birthtime = 0;
-	radius = 5;
+	radius = .1;
 	damping = .99;
 	mass = 1;
-	color = ofColor::mediumPurple;
+	color = ofColor::aquamarine;
 }
 
-void Particle::draw() 
-{
+void Particle::draw() {
 	ofSetColor(color);
-	
-	ofDrawCircle(position, radius);
-	
+//	ofSetColor(ofMap(age(), 0, lifespan, 255, 10), 0, 0);
+	ofDrawSphere(position, radius);
 }
 
 // write your own integrator here.. (hint: it's only 3 lines of code)
 //
-void Particle::integrate()
-{
+void Particle::integrate() {
 
-	
+	// check for 0 framerate to avoid divide errors
+	//
+	float framerate = ofGetFrameRate();
+	if (framerate < 1.0) return;
+
 	// interval for this step
 	//
-	float dt = 1.0 / ofGetFrameRate();
+	float dt = 1.0 / framerate;
 
 	// update position based on velocity
 	//
@@ -58,8 +58,7 @@ void Particle::integrate()
 
 //  return age in seconds
 //
-float Particle::age() 
-{
+float Particle::age() {
 	return (ofGetElapsedTimeMillis() - birthtime)/1000.0;
 }
 
