@@ -22,6 +22,8 @@ public:
 	void remove(int);
 	void update();
 	void setLifespan(float);
+	void setUnlimitedLife(bool b) { unlimitedLife = b; }
+	bool unlimitedLife = false;
 	void reset();
 	int removeNear(const ofVec3f & point, float dist);
 	void draw();

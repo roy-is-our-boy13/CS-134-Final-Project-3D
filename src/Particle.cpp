@@ -10,6 +10,7 @@ Particle::Particle() {
 	position.set(0, 0, 0);
 	forces.set(0, 0, 0);
 	lifespan = 5;
+	unlimitedLife = false; 
 	birthtime = 0;
 	radius = .1;
 	damping = .99;

@@ -21,6 +21,7 @@ public:
 	void remove(int);
 	void update();
 	void setLifespan(float);
+
 	void reset();
 	int removeNear(const ofVec3f& point, float dist);
 	void draw();

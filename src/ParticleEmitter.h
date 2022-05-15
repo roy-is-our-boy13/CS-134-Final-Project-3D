@@ -26,6 +26,7 @@ public:
 	void setGroupSize(int s) { groupSize = s; }
 	void setOneShot(bool s) { oneShot = s; }
 	void setRandomLife(bool b) { randomLife = b;  }
+	void setUnlimitedLife(bool b) { unlimitedLife = b; }
 	void setLifespanRange(const ofVec2f &r) { lifeMinMax = r; }
 	void setMass(float m) { mass = m; }
 	void setDamping(float d) { damping = d; }
@@ -33,6 +34,7 @@ public:
 	void spawn(float time);
 	ParticleSystem *sys;
 	float rate;         // per sec
+	bool unlimitedLife; 
 	bool oneShot;
 	bool fired;
 	bool randomLife;

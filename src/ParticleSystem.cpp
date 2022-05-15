@@ -39,11 +39,14 @@ void ParticleSystem::update() {
 	// traversing at the same time, we need to use an iterator.
 	//
 	while (p != particles.end()) {
-		if (p->lifespan != -1 && p->age() > p->lifespan) {
-			tmp = particles.erase(p);
-			p = tmp;
+		
+		if (!unlimitedLife){
+			if (p->lifespan != -1 && p->age() > p->lifespan) {
+				tmp = particles.erase(p);
+				p = tmp;
+			}
+			else p++;
 		}
-		else p++;
 	}
 
 	// update forces on all particles first 
@@ -143,5 +146,6 @@ void CyclicForce::updateForce(Particle * particle) {
 }
 
 void ThrusterForce::updateForce(Particle * particle) {
+	cout << "update thrust force" << endl; 
 	particle->forces += thrust;
 }

@@ -78,6 +78,7 @@ class ofApp : public ofBaseApp{
 			ofxFloatSlider lifespan;	// lifespan of the particles
 			ofxFloatSlider rate;	// particle spawn rate
 			ofxFloatSlider restitution;	// bounceback
+			ofxIntSlider thrustStr; // strength of the thrust, aka speed?
 
 			ofxFloatSlider camDistance; // this is the distance of the current camera view
 		ofxPanel gui;
@@ -105,5 +106,7 @@ class ofApp : public ofBaseApp{
 		const float selectionRange = 4.0;
 
 		float startTime, endTime; 
+
+		ParticleSystem* sys;
 
 };

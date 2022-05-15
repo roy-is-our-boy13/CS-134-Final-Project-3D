@@ -31,6 +31,7 @@ void ParticleEmitter::init() {
 	rate = 1;
 	velocity = ofVec3f(0, 20, 0);
 	lifespan = 3;
+	unlimitedLife = false; 
 	mass = 1;
 	randomLife = false;
 	lifeMinMax = ofVec3f(2, 4);
@@ -152,6 +153,7 @@ void ParticleEmitter::spawn(float time) {
 	particle.mass = mass;
 	particle.damping = damping;
 	particle.color = particleColor;
+	particle.unlimitedLife = true; 
 
 	// add to system
 	//

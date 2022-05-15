@@ -76,6 +76,7 @@ void ofApp::setup(){
 	gui.setup();
 	gui.add(numLevels.setup("Number of Octree Levels", 1, 1, 10));
 	gui.add(velocity.setup("Initial Velocity", ofVec3f(25, 35, 0), ofVec3f(0, 0, 0), ofVec3f(100, 100, 100)));	// high on default, change to thruster?
+	gui.add(thrustStr.setup("Thrust", 10, 1, 20));
 	gui.add(lifespan.setup("Lifespan", 2.0, .1, 10.0));
 	gui.add(rate.setup("Rate", 1.0, .5, 60.0));
 	gui.add(damping.setup("Damping", .99, .1, 1.0));
@@ -107,10 +108,10 @@ void ofApp::setup(){
 	//landerParticle.start();
 	landerParticle.setLifespan(10);
 
-	ParticleSystem* sys = landerParticle.sys;
+	sys = landerParticle.sys;
 	grav.set(ofVec3f(0, -1.0, 0));
 	sys->addForce(&grav);
-	sys->addForce(new TurbulenceForce(ofVec3f(-3, -1, -1), ofVec3f(3, 1, 1)));
+	//sys->addForce(new TurbulenceForce(ofVec3f(-3, -1, -1), ofVec3f(3, 1, 1)));
 
 }
 
@@ -120,11 +121,19 @@ void ofApp::setup(){
 //  it's has gone through the plane and we apply a simple impulse function
 //  resolve it..
 //
-void ofApp::checkCollisions() { //TODO: note, this is not currently bouncing off of anything 
-								//TODO: (will need to change it for collision with octree)
+void ofApp::checkCollisions() { //TODO: currently this is off of particle position. We need to change it to OCTREE collisions
 	
 	// for each particle, determine if we hit the groud plane.
 	//
+
+	//TODO: Fix the collision!
+	ofVec3f min = lander.getSceneMin() + lander.getPosition();
+	ofVec3f max = lander.getSceneMax() + lander.getPosition();
+
+	Box bounds = Box(Vector3(min.x, min.y, min.z), Vector3(max.x, max.y, max.z));
+	colBoxList.clear();
+
+	octree.intersect(bounds, octree.root, colBoxList); //colBoxList describes the octree boxes that the lander is colliding with
 
 	for (int i = 0; i < landerParticle.sys->particles.size(); i++) {
 
@@ -134,9 +143,9 @@ void ofApp::checkCollisions() { //TODO: note, this is not currently bouncing off
 		if (vel.y >= 0) break;                             // ascending;
 
 		ofVec3f pos = landerParticle.sys->particles[i].position;
-
+		//cout << "pos.y =" << pos.y << endl;
 		if (pos.y < landerParticle.sys->particles[i].radius) {
-
+			cout << "impulse function" << endl; 
 			// apply impulse function
 			//
 			ofVec3f norm = ofVec3f(0, 1, 0);  // just use vertical for normal for now
@@ -151,6 +160,7 @@ void ofApp::checkCollisions() { //TODO: note, this is not currently bouncing off
 // incrementally update scene (animation)
 //
 void ofApp::update() {
+	checkCollisions();
 
 	// for the lander movement
 	grav.set(ofVec3f(0, -gravity, 0));
@@ -221,6 +231,7 @@ void ofApp::draw() {
 				ofVec3f max = lander.getSceneMax() + lander.getPosition();
 
 				Box bounds = Box(Vector3(min.x, min.y, min.z), Vector3(max.x, max.y, max.z));
+				ofNoFill(); // prevents holding box from filling white
 				ofSetColor(ofColor::white);
 				Octree::drawBox(bounds);
 
@@ -323,6 +334,26 @@ void ofApp::drawAxis(ofVec3f location) {
 void ofApp::keyPressed(int key) {
 
 	switch (key) {
+	case ' ': //apply up booster?
+		//sys->addForce(&grav);
+		//sys->addForce(new TurbulenceForce(ofVec3f(-3, -1, -1), ofVec3f(3, 1, 1)));
+		sys->addForce(new ThrusterForce(ofVec3f(0, 1*thrustStr, 0)));
+		//sys->addForce(&grav);
+		break;
+	case OF_KEY_UP: // forward
+		cout << "forward" << endl; 
+		break; 
+	case OF_KEY_LEFT: // left
+		cout << "left" << endl;
+		break;
+	case OF_KEY_DOWN: // back
+		cout << "back" << endl;
+		break;
+	case OF_KEY_RIGHT: // right
+		cout << "right" << endl;
+		break;
+
+
 	case 'B':
 	case 'b':
 		bDisplayBBoxes = !bDisplayBBoxes;
@@ -333,10 +364,6 @@ void ofApp::keyPressed(int key) {
 		else cam.enableMouseInput();
 		break;
 	case 'D':
-	case 'd': //?? Dev mode 
-		if (cam.getMouseInputEnabled()) cam.disableMouseInput();
-		else cam.enableMouseInput();
-		break;
 	case 'F':
 	case 'f':
 		ofToggleFullscreen();
@@ -381,8 +408,6 @@ void ofApp::keyPressed(int key) {
 	case OF_KEY_CONTROL:
 		bCtrlKeyDown = true;
 		break;
-	case OF_KEY_SHIFT:
-		break;
 	case OF_KEY_DEL:
 		break;
 	case OF_KEY_F1:
@@ -394,14 +419,12 @@ void ofApp::keyPressed(int key) {
 	case OF_KEY_F3:
 		theCam = &cam2;
 		break;
-	case ' ':				// release a particle
-		landerParticle.start(); //TODO: How do we use this to relaunch the same particle more than once?
-		//if (landerParticle.sys->particles.size() >= 1) {
-		//	ofVec3f vel = landerParticle.sys->particles[0].position; // checking location of the first particle in the system... 
-
-		//	lander.setPosition(vel.x, vel.y, vel.z);
-		//}
-		//else { landerParticle.start(); }
+	case OF_KEY_SHIFT:				// release a particle
+		//landerParticle.start(); //TODO: How do we use this to relaunch the same particle more than once?
+		if (landerParticle.sys->particles.size() <= 0) { landerParticle.start(); }
+		break;
+	case OF_KEY_BACKSPACE:				// return particle to original pos
+		landerParticle.sys->particles[0].position = ofVec3f(1, 1, 0); 
 		break;
 	default:
 		break;
