@@ -13,21 +13,17 @@
 #include "box.h"
 #include "ray.h"
 #include <glm/gtx/intersect.hpp>
-#include "ofApp.h"
-#include "vector3.h"
 
 
-class TreeNode
-{
+
+class TreeNode {
 public:
 	Box box;
 	vector<int> points;
 	vector<TreeNode> children;
 };
 
-class Octree 
-{
-	const ofColor colors[7]{ ofColor::red, ofColor::green };
+class Octree {
 public:
 	
 	void create(const ofMesh & mesh, int numLevels);
@@ -35,8 +31,7 @@ public:
 	bool intersect(const Ray &, const TreeNode & node, TreeNode & nodeRtn);
 	bool intersect(const Box &, TreeNode & node, vector<Box> & boxListRtn);
 	void draw(TreeNode & node, int numLevels, int level);
-	void draw(int numLevels, int level) 
-	{
+	void draw(int numLevels, int level) {
 		draw(root, numLevels, level);
 	}
 	void drawLeafNodes(TreeNode & node);
@@ -46,8 +41,6 @@ public:
 	int getMeshFacesInBox(const ofMesh &mesh, const vector<int> & faces, Box & box, vector<int> & facesRtn);
 	void subDivideBox8(const Box &b, vector<Box> & boxList);
 
-	bool intersetingPoint(ofVec3f &, TreeNode &node, TreeNode &noder);
-
 	ofMesh mesh;
 	TreeNode root;
 	bool bUseFaces = false;
@@ -56,5 +49,4 @@ public:
 	//
 	int strayVerts= 0;
 	int numLeaf = 0;
-	
 };

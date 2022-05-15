@@ -22,7 +22,6 @@ void Octree::drawBox(const Box &box) {
 	float w = size.x();
 	float h = size.y();
 	float d = size.z();
-	//ofSetColor(colors[colorIndex]);
 	ofDrawBox(p, w, h, d);
 }
 
@@ -211,17 +210,11 @@ bool Octree::intersect(const Box &box, TreeNode & node, vector<Box> & boxListRtn
 
 	intersects = node.box.overlap(box); //i tried to do it the other way around, but it doesn't seem like its compatible
 	
-	if (intersects)
-	{
-		if (node.children.size() > 0) 
-		{ //has children, we can recurse
-			for (int k = 0; k < node.children.size(); k++)
-			{ // if our ray intersects with the box in question, we need to check the children
+	if (intersects) {
+		if (node.children.size() > 0) { //has children, we can recurse
+			for (int k = 0; k < node.children.size(); k++) { // if our ray intersects with the box in question, we need to check the children
 				intersects = intersect(box, node.children[k], boxListRtn);
-				if (intersects)
-				{ 
-					return intersects; 
-				} //if true, we break out 
+				if (intersects) { return intersects; } //if true, we break out 
 			}
 		}
 		else { //no children, this is a leaf node 
@@ -237,44 +230,22 @@ bool Octree::intersect(const Box &box, TreeNode & node, vector<Box> & boxListRtn
 	// implemented based on Octree Reference document
 	// draw Octree (recursively)
 	// 
-void Octree::draw(TreeNode & node, int numLevels, int level)
-{
-	if (level >= numLevels)
-	{ 
-		return; 
-	}
-
+void Octree::draw(TreeNode & node, int numLevels, int level) {
+	if (level >= numLevels) return;
 	drawBox(node.box);
 	level++;
-	for (int i = 0; i < node.children.size(); i++) 
-	{
+	for (int i = 0; i < node.children.size(); i++) {
 		draw(node.children[i], numLevels, level);
 	}
 }
 
 // Optional
 //
-void Octree::drawLeafNodes(TreeNode & node) 
-{
-	if (node.children.size() <= 0) 
-	{
-		drawBox(node.box);
-		return;
-	}
-	else 
-	{
-		for (int i = 0; i < node.children.size(); i++) 
-		{
-			drawLeafNodes(node.children[i]);
-		}
-	}
+void Octree::drawLeafNodes(TreeNode & node) {
+
+
 }
 
 
-bool Octree::intersetingPoint(ofVec3f&, TreeNode& node, TreeNode& noder) 
-{
-	//if (node.box) 
-	
-}
 
 

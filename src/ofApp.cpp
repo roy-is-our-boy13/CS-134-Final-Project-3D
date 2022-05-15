@@ -6,7 +6,7 @@
 //  Octree Test - startup scene
 // 
 //
-//  Student Name:   Roy Perlman and Lauren MacPherson
+//  Student Name:   < Your Name goes Here >
 //  Date: <date of last version>
 
 
@@ -14,25 +14,38 @@
 #include "Util.h"
 
 
+
 //--------------------------------------------------------------
 // setup scene, lighting, state and load geometry
 //
-void ofApp::setup()
-{
+void ofApp::setup(){
 	bWireframe = false;
 	bDisplayPoints = false;
 	bAltKeyDown = false;
 	bCtrlKeyDown = false;
 	bLanderLoaded = false;
 	bTerrainSelected = true;
-	ofSetWindowShape(1024, 768);
-	cam.setDistance(10);
-	cam.setNearClip(.1);
+//	ofSetWindowShape(1024, 768);
+// 
+	//TODO: What do we want the intial camera distance to be?
+	cam.setDistance(75);
+
+	//TODO: this has a weird reaction to having the different cameras
+	//cam.setNearClip(.1);
 	cam.setFov(65.5);   // approx equivalent to 28mm in 35mm format
 	ofSetVerticalSync(true);
 	cam.disableMouseInput();
 	ofEnableSmoothing();
 	ofEnableDepthTest();
+
+	theCam = &cam; // referencing the main camera
+
+	cam1.setGlobalPosition(glm::vec3(100, 0, 0));
+	cam1.lookAt(glm::vec3(0, 0, 0));
+
+	cam2.setGlobalPosition(glm::vec3(0, 150, 0));
+	cam2.lookAt(glm::vec3(0, 0, 0));
+
 
 	// setup rudimentary lighting 
 	//
@@ -41,29 +54,17 @@ void ofApp::setup()
 	mars.loadModel("geo/mars-low-5x-v2.obj");
 	mars.setScaleNormalization(false);
 
-
-
-	if (lander.loadModel("geo/lander.obj")) 
-	{
-		lander.setScaleNormalization(false);
-		//		lander.setScale(.1, .1, .1);
-			//	lander.setPosition(point.x, point.y, point.z);
-		lander.setPosition(1, 1, 0);
-
-		bLanderLoaded = true;
-		for (int i = 0; i < lander.getMeshCount(); i++) {
-			bboxList.push_back(Octree::meshBounds(lander.getMesh(i)));
-		}
-
-		cout << "Mesh Count: " << lander.getMeshCount() << endl;
-	}
-	//else cout << "Error: Can't load model" << dragInfo.files[0] << endl;
-
-
 	// create sliders for testing
 	//
 	gui.setup();
 	gui.add(numLevels.setup("Number of Octree Levels", 1, 1, 10));
+	gui.add(velocity.setup("Initial Velocity", ofVec3f(5, 10, 0), ofVec3f(0, 0, 0), ofVec3f(100, 100, 100)));	
+	gui.add(lifespan.setup("Lifespan", 2.0, .1, 10.0));
+	gui.add(rate.setup("Rate", 1.0, .5, 60.0));
+	gui.add(damping.setup("Damping", .99, .1, 1.0));
+    gui.add(gravity.setup("Gravity", 10, 1, 20));
+	gui.add(radius.setup("Radius", .1, .01, 1.0));
+	gui.add(restitution.setup("Restitution", .85, 0, 1.5));
 	bHide = false;
 
 	//  Create Octree for testing.
@@ -78,6 +79,38 @@ void ofApp::setup()
 
 	testBox = Box(Vector3(3, 3, 0), Vector3(5, 5, 2));
 
+}
+
+//	FROM: examples/particleBouncingBall, written by prof. smith
+//  This a very simple function to check for collision on the ground plane at (0,0,0)
+//  If the partical position.y value is smaller than it's radius, we will assume
+//  it's has gone through the plane and we apply a simple impulse function
+//  resolve it..
+//
+void ofApp::checkCollisions() {
+	
+	// for each particle, determine if we hit the groud plane.
+	//
+
+	//TODO: Uncomment
+	// for (int i = 0; i < emitter.sys->particles.size(); i++) {
+
+    //     // only bother to check for descending particles.
+    //     //
+	// 	ofVec3f vel = emitter.sys->particles[i].velocity; // velocity of particle
+	// 	if (vel.y >= 0) break;                             // ascending;
+
+	// 	ofVec3f pos = emitter.sys->particles[i].position;
+
+	// 	if (pos.y < emitter.sys->particles[i].radius) {
+
+    //         // apply impulse function
+    //         //
+	// 		ofVec3f norm = ofVec3f(0, 1, 0);  // just use vertical for normal for now
+	// 		ofVec3f f = (restitution + 1.0)*((-vel.dot(norm))*norm);
+	// 		emitter.sys->particles[i].forces += ofGetFrameRate() * f;
+	// 	}
+	// }
 
 
 }
@@ -97,7 +130,12 @@ void ofApp::draw() {
 	if (!bHide) gui.draw();
 	glDepthMask(true);
 
-	cam.begin();
+	// cam.begin();
+	theCam->begin(); 
+
+	
+
+
 	ofPushMatrix();
 	if (bWireframe) {                    // wireframe mode  (include axis)
 		ofDisableLighting();
@@ -190,7 +228,14 @@ void ofApp::draw() {
 	}
 
 	ofPopMatrix();
-	cam.end();
+	
+	//TODO: draw these?
+	/*cam.draw();
+	cam1.draw();
+	cam2.draw();*/
+
+	theCam->end();
+	// cam.end();
 }
 
 
@@ -230,6 +275,11 @@ void ofApp::keyPressed(int key) {
 		break;
 	case 'C':
 	case 'c':
+		if (cam.getMouseInputEnabled()) cam.disableMouseInput();
+		else cam.enableMouseInput();
+		break;
+	case 'D':
+	case 'd': //?? Dev mode 
 		if (cam.getMouseInputEnabled()) cam.disableMouseInput();
 		else cam.enableMouseInput();
 		break;
@@ -277,6 +327,15 @@ void ofApp::keyPressed(int key) {
 	case OF_KEY_SHIFT:
 		break;
 	case OF_KEY_DEL:
+		break;
+	case OF_KEY_F1:
+		theCam = &cam;
+		break;
+	case OF_KEY_F2:
+		theCam = &cam1;
+		break;
+	case OF_KEY_F3:
+		theCam = &cam2;
 		break;
 	default:
 		break;
@@ -635,36 +694,13 @@ glm::vec3 ofApp::getMousePointOnPlane(glm::vec3 planePt, glm::vec3 planeNorm) {
 	else return glm::vec3(0, 0, 0);
 }
 
-void ofApp::colliisonCheck() 
-{
-	ofVec3f velocity;
-	//TreeNode node;
-	//Vector3 Center = landerBox.center();
-
-	//contactPoint = ofVec3f();
-	//velocity = emitter.sys->particles[0].velocity;
-
-
-	if (velocity.y >= 0)
-	{
-		return;
-	}
-
-	//ourTree.pointIntersect(contactPoint, ourTree.root, node);
-}
-void ofApp::fontColliisonCheck()
-{
-
-}
-void ofApp::backColliisonCheck()
-{
-
-}
-void ofApp::leftColliisonCheck()
-{
-
-}
-void ofApp::rightColliisonCheck()
-{
+//	a state mode that enables the following user actions: 
+//	- pause gravity (TODO:)
+//	- drag lander (TODO:)
+//	- reset timer/gas (TODO:)
+//	- turn off collisions? (TODO:)
+//	- move camera to any angle (TODO:)
+//	- ??? (More?)
+void ofApp::devMode(){ 
 
 }

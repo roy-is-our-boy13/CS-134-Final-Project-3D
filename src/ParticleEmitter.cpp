@@ -3,15 +3,13 @@
 
 #include "ParticleEmitter.h"
 
-ParticleEmitter::ParticleEmitter()
-{
+ParticleEmitter::ParticleEmitter() {
 	sys = new ParticleSystem();
 	createdSys = true;
 	init();
 }
 
-ParticleEmitter::ParticleEmitter(ParticleSystem *s) 
-{
+ParticleEmitter::ParticleEmitter(ParticleSystem *s) {
 	if (s == NULL)
 	{
 		cout << "fatal error: null particle system passed to ParticleEmitter()" << endl;
@@ -22,40 +20,39 @@ ParticleEmitter::ParticleEmitter(ParticleSystem *s)
 	init();
 }
 
-ParticleEmitter::~ParticleEmitter() 
-{
+ParticleEmitter::~ParticleEmitter() {
 
 	// deallocate particle system if emitter created one internally
 	//
 	if (createdSys) delete sys;
 }
 
-void ParticleEmitter::init() 
-{
+void ParticleEmitter::init() {
 	rate = 1;
-	direction = ofVec3f(1, 0, 0);
-	speed = 300;
+	velocity = ofVec3f(0, 20, 0);
 	lifespan = 3;
+	mass = 1;
+	randomLife = false;
+	lifeMinMax = ofVec3f(2, 4);
 	started = false;
 	oneShot = false;
 	fired = false;
 	lastSpawned = 0;
 	radius = 1;
-	particleRadius = 10;
-	visible = false;
+	particleRadius = .1;
+	visible = true;
 	type = DirectionalEmitter;
 	groupSize = 1;
-	lazerSound.load("laser.mp3");
+	damping = .99;
+	particleColor = ofColor::red;
+	position = ofVec3f(0, 0, 0);
 }
 
 
 
-void ParticleEmitter::draw()
-{
-	if (visible)
-	{
-		switch (type) 
-		{
+void ParticleEmitter::draw() {
+	if (visible) {
+		switch (type) {
 		case DirectionalEmitter:
 			ofDrawSphere(position, radius/10);  // just draw a small sphere for point emitters 
 			break;
@@ -69,48 +66,42 @@ void ParticleEmitter::draw()
 	}
 	sys->draw();  
 }
-void ParticleEmitter::start()
-{
+void ParticleEmitter::start() {
+	if (started) return;
 	started = true;
-	fired = false;
 	lastSpawned = ofGetElapsedTimeMillis();
 }
 
-void ParticleEmitter::stop()
-{
+void ParticleEmitter::stop() {
 	started = false;
 	fired = false;
-	sys->particles.clear();
 }
-void ParticleEmitter::update()
-{
+void ParticleEmitter::update() {
 
 	float time = ofGetElapsedTimeMillis();
 
-	if (oneShot && started)
-	{
-		if (!fired) 
-		{
+	if (oneShot && started) {
+		if (!fired) {
 
 			// spawn a new particle(s)
 			//
-			for (int i = 0; i < groupSize; i++)
+			for (int i = 0; i < groupSize; i++) {
 				spawn(time);
+			}
 
 			lastSpawned = time;
 		}
 		fired = true;
-		//stop();
+		stop();
 	}
 
-	else if (((time - lastSpawned) > (1000.0 / rate)) && started) 
-	{
-		lazerSound.play();
+	else if (((time - lastSpawned) > (1000.0 / rate)) && started) {
+
 		// spawn a new particle(s)
 		//
-		for (int i = 0; i < groupSize; i++)
+		for (int i= 0; i < groupSize; i++)
 			spawn(time);
-
+	
 		lastSpawned = time;
 	}
 
@@ -119,42 +110,50 @@ void ParticleEmitter::update()
 
 // spawn a single particle.  time is current time of birth
 //
-void ParticleEmitter::spawn(float time)
-{
+void ParticleEmitter::spawn(float time) {
 
 	Particle particle;
 
 	// set initial velocity and position
 	// based on emitter type
 	//
-	switch (type)
-	{
+	switch (type) {
 	case RadialEmitter:
-	{
-		//ofVec3f dir = ofVec3f(ofRandom(-1, 1), ofRandom(-1, 1), ofRandom(-1, 1));
-
-		ofVec3f dir = ofVec3f(ofRandom(-1, 1), 0, ofRandom(-1, 1));
+	  {
+		ofVec3f dir = ofVec3f(ofRandom(-1, 1), ofRandom(-1, 1), ofRandom(-1, 1));
+		float speed = velocity.length();
 		particle.velocity = dir.getNormalized() * speed;
 		particle.position.set(position);
-	}
+	  }
 	break;
 	case SphereEmitter:
-		particle.position.set(position);
 		break;
 	case DirectionalEmitter:
-		particle.velocity = speed * direction;
+		particle.velocity = velocity;
 		particle.position.set(position);
 		break;
+	case DiscEmitter:   // x-z plane
+	  {  
+		ofVec3f dir = ofVec3f(ofRandom(-1, 1), ofRandom(-.2, .2), ofRandom(-1, 1));
+	//	dir.y = 0; 
+		particle.position.set(position + (dir.normalized() * radius));
+		particle.velocity = velocity;
+	  }
 	}
 
 	// other particle attributes
 	//
-	particle.lifespan = lifespan;
+	if (randomLife) {
+		particle.lifespan = ofRandom(lifeMinMax.x, lifeMinMax.y);
+	}
+	else particle.lifespan = lifespan;
 	particle.birthtime = time;
 	particle.radius = particleRadius;
+	particle.mass = mass;
+	particle.damping = damping;
+	particle.color = particleColor;
 
 	// add to system
 	//
 	sys->add(particle);
 }
-
