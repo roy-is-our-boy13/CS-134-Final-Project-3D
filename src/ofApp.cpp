@@ -68,14 +68,14 @@ void ofApp::setup(){
 			bboxList.push_back(Octree::meshBounds(lander.getMesh(i)));
 		}
 
-		cout << "Mesh Count: " << lander.getMeshCount() << endl;
+		//cout << "Mesh Count: " << lander.getMeshCount() << endl;
 	}
 
 	// create sliders for testing
 	//
 	gui.setup();
 	gui.add(numLevels.setup("Number of Octree Levels", 1, 1, 10));
-	gui.add(velocity.setup("Initial Velocity", ofVec3f(5, 10, 0), ofVec3f(0, 0, 0), ofVec3f(100, 100, 100)));	
+	gui.add(velocity.setup("Initial Velocity", ofVec3f(25, 35, 0), ofVec3f(0, 0, 0), ofVec3f(100, 100, 100)));	// high on default, change to thruster?
 	gui.add(lifespan.setup("Lifespan", 2.0, .1, 10.0));
 	gui.add(rate.setup("Rate", 1.0, .5, 60.0));
 	gui.add(damping.setup("Damping", .99, .1, 1.0));
@@ -90,9 +90,9 @@ void ofApp::setup(){
 	startTime = ofGetElapsedTimeMillis(); 
 	octree.create(mars.getMesh(0), 20);
 	endTime = ofGetElapsedTimeMillis() - startTime;
-	cout << "Time to run Octree:: create: " << ofToString(endTime) << " milliseconds" << endl;
+	//cout << "Time to run Octree:: create: " << ofToString(endTime) << " milliseconds" << endl;
 	
-	cout << "Number of Verts: " << mars.getMesh(0).getNumVertices() << endl;
+	//cout << "Number of Verts: " << mars.getMesh(0).getNumVertices() << endl;
 
 	testBox = Box(Vector3(3, 3, 0), Vector3(5, 5, 2));
 
@@ -104,7 +104,7 @@ void ofApp::setup(){
 								// we can test this by treating this as a normal particle emitter and connecting lander position to it?
 	landerParticle.setOneShot(true);
 
-	landerParticle.start();
+	//landerParticle.start();
 	landerParticle.setLifespan(10);
 
 	ParticleSystem* sys = landerParticle.sys;
@@ -120,31 +120,30 @@ void ofApp::setup(){
 //  it's has gone through the plane and we apply a simple impulse function
 //  resolve it..
 //
-void ofApp::checkCollisions() {
+void ofApp::checkCollisions() { //TODO: note, this is not currently bouncing off of anything 
+								//TODO: (will need to change it for collision with octree)
 	
 	// for each particle, determine if we hit the groud plane.
 	//
 
-	//TODO: Uncomment
-	// for (int i = 0; i < emitter.sys->particles.size(); i++) {
+	for (int i = 0; i < landerParticle.sys->particles.size(); i++) {
 
-    //     // only bother to check for descending particles.
-    //     //
-	// 	ofVec3f vel = emitter.sys->particles[i].velocity; // velocity of particle
-	// 	if (vel.y >= 0) break;                             // ascending;
+       // only bother to check for descending particles.
+       //
+		ofVec3f vel = landerParticle.sys->particles[i].velocity; // velocity of particle
+		if (vel.y >= 0) break;                             // ascending;
 
-	// 	ofVec3f pos = emitter.sys->particles[i].position;
+		ofVec3f pos = landerParticle.sys->particles[i].position;
 
-	// 	if (pos.y < emitter.sys->particles[i].radius) {
+		if (pos.y < landerParticle.sys->particles[i].radius) {
 
-    //         // apply impulse function
-    //         //
-	// 		ofVec3f norm = ofVec3f(0, 1, 0);  // just use vertical for normal for now
-	// 		ofVec3f f = (restitution + 1.0)*((-vel.dot(norm))*norm);
-	// 		emitter.sys->particles[i].forces += ofGetFrameRate() * f;
-	// 	}
-	// }
-
+			// apply impulse function
+			//
+			ofVec3f norm = ofVec3f(0, 1, 0);  // just use vertical for normal for now
+			ofVec3f f = (restitution + 1.0)*((-vel.dot(norm))*norm);
+			landerParticle.sys->particles[i].forces += ofGetFrameRate() * f;
+		}
+	}
 
 }
  
@@ -157,12 +156,21 @@ void ofApp::update() {
 	grav.set(ofVec3f(0, -gravity, 0));
 	landerParticle.setParticleRadius(radius);
 
+
+	//TODO: should I be adding the particle integrator here?
 	// get velocity from slider
 	glm::vec3 v = velocity;
 	landerParticle.setVelocity(v);
 	//
 	// update objects you've created here
 	landerParticle.update();
+
+
+	if (landerParticle.sys->particles.size() >= 1) { 
+		ofVec3f vel = landerParticle.sys->particles[0].position; // checking location of the first particle in the system... 
+
+		lander.setPosition(vel.x, vel.y, vel.z);
+	}
 }
 //--------------------------------------------------------------
 void ofApp::draw() {
@@ -251,7 +259,7 @@ void ofApp::draw() {
 
 	if (bDisplayLeafNodes) {
 		octree.drawLeafNodes(octree.root);
-		cout << "num leaf: " << octree.numLeaf << endl;
+		//cout << "num leaf: " << octree.numLeaf << endl;
     }
 	else if (bDisplayOctree) {
 		ofNoFill();
@@ -353,7 +361,10 @@ void ofApp::keyPressed(int key) {
 	case 't':
 		setCameraTarget();
 		break;
-	case 'u':
+	case 'u': //** RESET THE POSITION OF THE STARTING PARTICLE
+		//ofVec3f vel = landerParticle.sys->particles[0].position;
+
+		landerParticle.sys->particles[0].position = ofVec3f(1, 1, 0);
 		break;
 	case 'v':
 		togglePointsDisplay();
@@ -384,7 +395,13 @@ void ofApp::keyPressed(int key) {
 		theCam = &cam2;
 		break;
 	case ' ':				// release a particle
-		landerParticle.start();
+		landerParticle.start(); //TODO: How do we use this to relaunch the same particle more than once?
+		//if (landerParticle.sys->particles.size() >= 1) {
+		//	ofVec3f vel = landerParticle.sys->particles[0].position; // checking location of the first particle in the system... 
+
+		//	lander.setPosition(vel.x, vel.y, vel.z);
+		//}
+		//else { landerParticle.start(); }
 		break;
 	default:
 		break;
@@ -457,7 +474,7 @@ void ofApp::mousePressed(int x, int y, int button) {
 		startTime = ofGetElapsedTimeMillis(); 
 		bool hit = bounds.intersect(Ray(Vector3(origin.x, origin.y, origin.z), Vector3(mouseDir.x, mouseDir.y, mouseDir.z)), 0, 10000);
 		endTime = ofGetElapsedTimeMillis() - startTime;
-		cout << "Time to run bounds.intersect: " << ofToString(endTime) << " milliseconds" << endl;
+		//cout << "Time to run bounds.intersect: " << ofToString(endTime) << " milliseconds" << endl;
 
 		if (hit) {
 			bLanderSelected = true;
@@ -486,7 +503,7 @@ bool ofApp::raySelectWithOctree(ofVec3f &pointRet) {
 	startTime = ofGetElapsedTimeMillis(); 
 	pointSelected = octree.intersect(ray, octree.root, selectedNode);
 	endTime = ofGetElapsedTimeMillis() - startTime;
-	cout << "Time to run octree.intersect: " << ofToString(endTime) << " milliseconds" << endl;
+	//cout << "Time to run octree.intersect: " << ofToString(endTime) << " milliseconds" << endl;
 
 	if (pointSelected) {
 		pointRet = octree.mesh.getVertex(selectedNode.points[0]);
@@ -526,7 +543,7 @@ void ofApp::mouseDragged(int x, int y, int button) {
 		startTime = ofGetElapsedTimeMillis(); 
 		octree.intersect(bounds, octree.root, colBoxList);
 		endTime = ofGetElapsedTimeMillis() - startTime;
-		cout << "Time to run octree.intersect: " << ofToString(endTime) << " milliseconds" << endl;
+		//cout << "Time to run octree.intersect: " << ofToString(endTime) << " milliseconds" << endl;
 
 		/*if (bounds.overlap(testBox)) {
 			cout << "overlap" << endl;
@@ -644,7 +661,7 @@ void ofApp::dragEvent2(ofDragInfo dragInfo) {
 			bboxList.push_back(Octree::meshBounds(lander.getMesh(i)));
 		}
 
-		cout << "Mesh Count: " << lander.getMeshCount() << endl;
+		//cout << "Mesh Count: " << lander.getMeshCount() << endl;
 	}
 	else cout << "Error: Can't load model" << dragInfo.files[0] << endl;
 }
@@ -667,7 +684,7 @@ void ofApp::dragEvent(ofDragInfo dragInfo) {
 		bLanderLoaded = true;
 		lander.setScaleNormalization(false);
 		lander.setPosition(0, 0, 0);
-		cout << "number of meshes: " << lander.getNumMeshes() << endl;
+		//cout << "number of meshes: " << lander.getNumMeshes() << endl;
 		bboxList.clear();
 		for (int i = 0; i < lander.getMeshCount(); i++) {
 			bboxList.push_back(Octree::meshBounds(lander.getMesh(i)));
