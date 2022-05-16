@@ -28,7 +28,8 @@ void Lander::integrate() {
 
 	// clear forces on Lander (they get re-added each step)
 	//
-	forces.set(0, 0, 0);
+	//forces.set(0, 0, 0);
+	forces.set(gravity.x, gravity.y, gravity.z); //	We always have gravity, so reset it by reapplying the gravity?
 }
 
 //	set the gravity that will work in the system

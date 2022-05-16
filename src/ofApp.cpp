@@ -73,7 +73,7 @@ void ofApp::setup(){
 	gui.setup();
 	gui.add(numLevels.setup("Number of Octree Levels", 1, 1, 10));
 	gui.add(velocity.setup("Initial Velocity", ofVec3f(25, 35, 0), ofVec3f(0, 0, 0), ofVec3f(100, 100, 100)));	// high on default, change to thruster?
-	gui.add(thrustStr.setup("Thrust", 300, 100, 1000));
+	gui.add(thrustStr.setup("Thrust", 100, 100, 1000));
 	gui.add(lifespan.setup("Lifespan", 2.0, .1, 10.0));
 	gui.add(rate.setup("Rate", 1.0, .5, 60.0));
 	gui.add(damping.setup("Damping", .99, .1, 1.0));
@@ -333,28 +333,25 @@ void ofApp::drawAxis(ofVec3f location) {
 void ofApp::keyPressed(int key) {
 
 	switch (key) {
-	case ' ': //apply up booster?
-		//sys->addForce(&grav);
-		//sys->addForce(new TurbulenceForce(ofVec3f(0, -1, 0), ofVec3f(0, 1, 0)));
-		/*sys->addForce(new ThrusterForce(ofVec3f(0, 1*thrustStr, 0)));
-		sys->addForce(&grav);*/
+	case ' ': //apply up booster
 		lander.applyThrust(ofVec3f( 0, 1*thrustStr, 0)); //too strong?
-		//lander.applyGravity(); 
-
 		break;
 	case OF_KEY_UP: // forward
 		cout << "forward" << endl; 
+		lander.applyThrust(ofVec3f(0, 0, -1 * thrustStr));
 		break; 
 	case OF_KEY_LEFT: // left
 		cout << "left" << endl;
+		lander.applyThrust(ofVec3f(-1 * thrustStr, 0, 0));
 		break;
 	case OF_KEY_DOWN: // back
 		cout << "back" << endl;
+		lander.applyThrust(ofVec3f(0, 0, 1 * thrustStr));
 		break;
 	case OF_KEY_RIGHT: // right
 		cout << "right" << endl;
+		lander.applyThrust(ofVec3f(1 * thrustStr, 0, 0));
 		break;
-
 
 	case 'B':
 	case 'b':
