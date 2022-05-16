@@ -32,6 +32,10 @@ void Lander::integrate() {
 	forces.set(gravity.x, gravity.y, gravity.z); //	We always have gravity, so reset it by reapplying the gravity?
 }
 
+//void Lander::setPosition(float x, float y, float z) {
+//	position = ofVec3f(x, y, z);
+//}
+
 //	set the gravity that will work in the system
 void Lander::setGravity(const ofVec3f g) {
 	gravity = g;
@@ -43,12 +47,10 @@ void Lander::applyGravity() {
 	// f = mg
 	//
 
-	cout << "applying gravity" << endl; 
 	forces += gravity * mass;
 }
 
 //	applying the thrust from any direction
 void Lander::applyThrust(ofVec3f t) {
-	cout << "applying thrust" << endl;
 	forces += t; 
 }

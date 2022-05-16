@@ -53,7 +53,7 @@ class ofApp : public ofBaseApp{
 		ofCamera* theCam;
 
 		//ofxAssimpModelLoader mars, lander;
-		ofxAssimpModelLoader mars; 
+		ofxAssimpModelLoader lunar; 
 		Lander lander; 
 
 		ofLight light;

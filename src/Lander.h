@@ -11,7 +11,7 @@ class Lander : public ofxAssimpModelLoader {
 public:
 	//Lander(){}; //no instance of lander, only used to do work on the lander
 
-	ofVec3f position = ofVec3f(1, 1, 0);
+	ofVec3f position = ofVec3f(1, 2, 0);
 	ofVec3f velocity = ofVec3f(0, 0, 0);
 	ofVec3f acceleration = ofVec3f(0, 0, 0);
 	ofVec3f forces = ofVec3f(0, 0, 0);
@@ -21,6 +21,7 @@ public:
 	float   mass = 1;
 	
 	void    integrate();
+	//void	setPosition(float x, float y, float z); 
 	void	setGravity(ofVec3f g);
 	void	applyGravity();
 	void	applyThrust(ofVec3f t);

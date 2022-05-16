@@ -51,14 +51,14 @@ void ofApp::setup(){
 	//
 	initLightingAndMaterials();
 
-	mars.loadModel("geo/mars-low-5x-v2.obj");
-	mars.setScaleNormalization(false);
+	lunar.loadModel("geo/mars-low-5x-v2.obj");
+	lunar.setScaleNormalization(false);
 
 
 	//Loading lander without drag+drop
 	if (lander.loadModel("geo/lander.obj")){
 		lander.setScaleNormalization(false);
-		lander.setPosition(1, 1, 0);
+		lander.setPosition(1, 2, 0);
 
 		bLanderLoaded = true;
 		for (int i = 0; i < lander.getMeshCount(); i++) {
@@ -77,16 +77,16 @@ void ofApp::setup(){
 	gui.add(lifespan.setup("Lifespan", 2.0, .1, 10.0));
 	gui.add(rate.setup("Rate", 1.0, .5, 60.0));
 	gui.add(damping.setup("Damping", .99, .1, 1.0));
-    gui.add(gravity.setup("Gravity", 10, 1, 20));
+    gui.add(gravity.setup("Gravity", 0, 0, 20));
 	gui.add(radius.setup("Radius", .1, .01, 1.0));
-	gui.add(restitution.setup("Restitution", .85, 0, 1.5));
+	gui.add(restitution.setup("Restitution", .85, 0, 1.0));
 	bHide = false;
 
 	//  Create Octree for testing.
 	//
 	
 	startTime = ofGetElapsedTimeMillis(); 
-	octree.create(mars.getMesh(0), 20);
+	octree.create(lunar.getMesh(0), 20);
 	endTime = ofGetElapsedTimeMillis() - startTime;
 	//cout << "Time to run Octree:: create: " << ofToString(endTime) << " milliseconds" << endl;
 	
@@ -121,11 +121,27 @@ void ofApp::setup(){
 //  resolve it..
 //
 void ofApp::checkCollisions() { //TODO: currently this is off of particle position. We need to change it to OCTREE collisions
-	
+
+	//Collision Detection(final proj)
+	//	* Take normal of each vertex from leaf nodes, and calculate average of them
+	//	- No rotations with spacecraft / lander, only apply impulse force
+	//	* Collision steps
+	//	1.) Detect Collision
+	//	2.) Get contact info
+	//		> Normal (normalize?)
+	//	3.) Resolve Interpenetrations
+	//		p' = p + v * dt
+	//		p = p' - v * dt
+	//	4.) Apply Impulse
+	//> Same formula for 2D applies for 3D(from Midterm test ? )
+	//> No friction or micro - collisions
+
+
+
 	// for each particle, determine if we hit the groud plane.
 	//
 
-	//TODO: Fix the collision!
+	//TODO: It looks like the collisions are actually being detected, but are they being normalized? How do I resolve interpenetrations?
 	ofVec3f min = lander.getSceneMin() + lander.getPosition();
 	ofVec3f max = lander.getSceneMax() + lander.getPosition();
 
@@ -134,24 +150,43 @@ void ofApp::checkCollisions() { //TODO: currently this is off of particle positi
 
 	octree.intersect(bounds, octree.root, colBoxList); //colBoxList describes the octree boxes that the lander is colliding with
 
-	for (int i = 0; i < landerParticle.sys->particles.size(); i++) {
+	for (int j = 0 ; j < colBoxList.size() ; j++) { //for each box that's colliding, 
+		ofVec3f vel = lander.velocity; //access the velocity of the lander for the restitution bounce
+		cout << "lander velocity: " << vel << endl;
 
-       // only bother to check for descending particles.
-       //
-		ofVec3f vel = landerParticle.sys->particles[i].velocity; // velocity of particle
-		if (vel.y >= 0) break;                             // ascending;
+		// apply impulse function
+		//
+		ofVec3f norm = ofVec3f(0, 1, 0);  // TODO: this should be normalizing the mesh/vertices(?)
+		ofVec3f f = (restitution + 1.0) * ((-vel.dot(norm)) * norm);
+		cout << "f: " << f << endl; //the force we're applying to the lander
+		cout << "lander.forces: " << lander.forces << endl;
+		//cout << "ofGetFrameRate() * f: " << ofGetFrameRate() * f << endl;
+		//lander.forces += ofGetFrameRate() * f
+		lander.forces += f; //doing it without frame rate to see what happens?
+		lander.integrate(); 
 
-		ofVec3f pos = landerParticle.sys->particles[i].position;
-		//cout << "pos.y =" << pos.y << endl;
-		if (pos.y < landerParticle.sys->particles[i].radius) {
-			cout << "impulse function" << endl; 
-			// apply impulse function
-			//
-			ofVec3f norm = ofVec3f(0, 1, 0);  // just use vertical for normal for now
-			ofVec3f f = (restitution + 1.0)*((-vel.dot(norm))*norm);
-			landerParticle.sys->particles[i].forces += ofGetFrameRate() * f;
-		}
+		cout << "AFTER ADDITION: " << lander.forces << endl;
+		cout << "==============================================================================" << endl;
 	}
+
+	//for (int i = 0; i < landerParticle.sys->particles.size(); i++) {
+
+ //      // only bother to check for descending particles.
+ //      //
+	//	ofVec3f vel = landerParticle.sys->particles[i].velocity; // velocity of particle
+	//	if (vel.y >= 0) break;                             // ascending;
+
+	//	ofVec3f pos = landerParticle.sys->particles[i].position;
+	//	//cout << "pos.y =" << pos.y << endl;
+	//	if (pos.y < landerParticle.sys->particles[i].radius) {
+	//		cout << "impulse function" << endl; 
+	//		// apply impulse function
+	//		//
+	//		ofVec3f norm = ofVec3f(0, 1, 0);  // just use vertical for normal for now
+	//		ofVec3f f = (restitution + 1.0)*((-vel.dot(norm))*norm);
+	//		landerParticle.sys->particles[i].forces += ofGetFrameRate() * f;
+	//	}
+	//}
 
 }
  
@@ -164,6 +199,7 @@ void ofApp::update() {
 	// for the lander movement
 	grav.set(ofVec3f(0, -gravity, 0));
 	landerParticle.setParticleRadius(radius);
+	lander.setGravity(ofVec3f(0, -gravity, 0)); //update gravity 
 	lander.integrate();
 
 	//TODO: should I be adding the particle integrator here?
@@ -174,12 +210,11 @@ void ofApp::update() {
 	// update objects you've created here
 	landerParticle.update();
 
+	//if (landerParticle.sys->particles.size() >= 1) { 
+	//	ofVec3f vel = landerParticle.sys->particles[0].position; // checking location of the first particle in the system... 
 
-	if (landerParticle.sys->particles.size() >= 1) { 
-		ofVec3f vel = landerParticle.sys->particles[0].position; // checking location of the first particle in the system... 
-
-		lander.setPosition(vel.x, vel.y, vel.z);
-	}
+	//	lander.setPosition(vel.x, vel.y, vel.z);
+	//}
 }
 //--------------------------------------------------------------
 void ofApp::draw() {
@@ -198,7 +233,7 @@ void ofApp::draw() {
 	if (bWireframe) {                    // wireframe mode  (include axis)
 		ofDisableLighting();
 		ofSetColor(ofColor::slateGray);
-		mars.drawWireframe();
+		lunar.drawWireframe();
 		if (bLanderLoaded) {
 			lander.drawWireframe();
 			if (!bTerrainSelected) drawAxis(lander.getPosition());
@@ -207,7 +242,7 @@ void ofApp::draw() {
 	}
 	else {
 		ofEnableLighting();              // shaded mode
-		mars.drawFaces();
+		lunar.drawFaces();
 		ofMesh mesh;
 		if (bLanderLoaded) {
 			lander.drawFaces();
@@ -222,6 +257,20 @@ void ofApp::draw() {
 					Octree::drawBox(bboxList[i]);
 					ofPopMatrix();
 				}
+			}
+			ofVec3f min = lander.getSceneMin() + lander.getPosition();
+			ofVec3f max = lander.getSceneMax() + lander.getPosition();
+
+			Box bounds = Box(Vector3(min.x, min.y, min.z), Vector3(max.x, max.y, max.z));
+			ofNoFill(); // prevents holding box from filling white
+			ofSetColor(ofColor::white);
+			Octree::drawBox(bounds);
+
+			// draw colliding boxes
+			//
+			ofSetColor(ofColor::red);
+			for (int i = 0; i < colBoxList.size(); i++) {
+				Octree::drawBox(colBoxList[i]);
 			}
 
 			if (bLanderSelected) {
@@ -250,7 +299,7 @@ void ofApp::draw() {
 	if (bDisplayPoints) {                // display points as an option    
 		glPointSize(3);
 		ofSetColor(ofColor::green);
-		mars.drawVertices();
+		lunar.drawVertices();
 	}
 
 	// highlight selected point (draw sphere around selected point)
@@ -345,7 +394,9 @@ void ofApp::keyPressed(int key) {
 		lander.applyThrust(ofVec3f(-1 * thrustStr, 0, 0));
 		break;
 	case OF_KEY_DOWN: // back
+		//TODO: change to back, it's currently down
 		cout << "back" << endl;
+		//lander.applyThrust(ofVec3f(0, -1*thrustStr, 0));
 		lander.applyThrust(ofVec3f(0, 0, 1 * thrustStr));
 		break;
 	case OF_KEY_RIGHT: // right
@@ -423,7 +474,7 @@ void ofApp::keyPressed(int key) {
 		//if (landerParticle.sys->particles.size() <= 0) { landerParticle.start(); } //TODO: uncomment to start the game?
 		break;
 	case OF_KEY_BACKSPACE:				// return particle to original pos
-		landerParticle.sys->particles[0].position = ofVec3f(1, 1, 0); 
+		//lander.position = ofVec3f(1, 1, 0); 
 		break;
 	default:
 		break;
@@ -463,14 +514,11 @@ void ofApp::keyReleased(int key) {
 	}
 }
 
-
-
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y ){
 
 	
 }
-
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button) {
@@ -533,10 +581,9 @@ bool ofApp::raySelectWithOctree(ofVec3f &pointRet) {
 		pointRet = octree.mesh.getVertex(selectedNode.points[0]);
 	}
 	
+	cout << "touching the lander:" << pointSelected << endl; 
 	return pointSelected;
 }
-
-
 
 
 //--------------------------------------------------------------
