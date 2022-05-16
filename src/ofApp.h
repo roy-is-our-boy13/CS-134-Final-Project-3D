@@ -10,6 +10,8 @@
 //** Particle system and gravity start **//
 #include "Particle.h"
 #include "ParticleEmitter.h"
+
+#include "Lander.h"
 //** Particle system and gravity end **//
 
 
@@ -50,7 +52,10 @@ class ofApp : public ofBaseApp{
 		ofCamera cam1, cam2; // these are the other camera views
 		ofCamera* theCam;
 
-		ofxAssimpModelLoader mars, lander;
+		//ofxAssimpModelLoader mars, lander;
+		ofxAssimpModelLoader lunar; 
+		Lander lander; 
+
 		ofLight light;
 		Box boundingBox, landerBounds;
 		Box testBox;
@@ -63,7 +68,7 @@ class ofApp : public ofBaseApp{
 
 
 		//** Particle system and gravity start **//
-			ParticleEmitter emitter;
+			ParticleEmitter landerParticle;
 
 			GravityForce grav;
 			ImpulseForce impulse;  // test for collisions;
@@ -78,6 +83,7 @@ class ofApp : public ofBaseApp{
 			ofxFloatSlider lifespan;	// lifespan of the particles
 			ofxFloatSlider rate;	// particle spawn rate
 			ofxFloatSlider restitution;	// bounceback
+			ofxIntSlider thrustStr; // strength of the thrust, aka speed?
 
 			ofxFloatSlider camDistance; // this is the distance of the current camera view
 		ofxPanel gui;
@@ -105,5 +111,7 @@ class ofApp : public ofBaseApp{
 		const float selectionRange = 4.0;
 
 		float startTime, endTime; 
+
+		ParticleSystem* sys;
 
 };
