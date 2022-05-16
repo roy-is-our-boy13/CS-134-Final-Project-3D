@@ -152,5 +152,6 @@ void CyclicForce::updateForce(Particle * particle) {
 }
 
 void ThrusterForce::updateForce(Particle * particle) {
-	particle->forces = thrust;
+	//particle->forces = thrust;
+	particle->forces += thrust;
 }

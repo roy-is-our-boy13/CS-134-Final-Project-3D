@@ -10,6 +10,8 @@
 //** Particle system and gravity start **//
 #include "Particle.h"
 #include "ParticleEmitter.h"
+
+#include "Lander.h"
 //** Particle system and gravity end **//
 
 
@@ -50,7 +52,10 @@ class ofApp : public ofBaseApp{
 		ofCamera cam1, cam2; // these are the other camera views
 		ofCamera* theCam;
 
-		ofxAssimpModelLoader mars, lander;
+		//ofxAssimpModelLoader mars, lander;
+		ofxAssimpModelLoader mars; 
+		Lander lander; 
+
 		ofLight light;
 		Box boundingBox, landerBounds;
 		Box testBox;

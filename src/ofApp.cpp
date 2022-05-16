@@ -56,11 +56,8 @@ void ofApp::setup(){
 
 
 	//Loading lander without drag+drop
-	if (lander.loadModel("geo/lander.obj"))
-	{
+	if (lander.loadModel("geo/lander.obj")){
 		lander.setScaleNormalization(false);
-		//		lander.setScale(.1, .1, .1);
-			//	lander.setPosition(point.x, point.y, point.z);
 		lander.setPosition(1, 1, 0);
 
 		bLanderLoaded = true;
@@ -76,7 +73,7 @@ void ofApp::setup(){
 	gui.setup();
 	gui.add(numLevels.setup("Number of Octree Levels", 1, 1, 10));
 	gui.add(velocity.setup("Initial Velocity", ofVec3f(25, 35, 0), ofVec3f(0, 0, 0), ofVec3f(100, 100, 100)));	// high on default, change to thruster?
-	gui.add(thrustStr.setup("Thrust", 3, 1, 10));
+	gui.add(thrustStr.setup("Thrust", 300, 100, 1000));
 	gui.add(lifespan.setup("Lifespan", 2.0, .1, 10.0));
 	gui.add(rate.setup("Rate", 1.0, .5, 60.0));
 	gui.add(damping.setup("Damping", .99, .1, 1.0));
@@ -107,6 +104,8 @@ void ofApp::setup(){
 
 	//landerParticle.start();
 	landerParticle.setLifespan(20000);
+
+	lander.setGravity(ofVec3f(0, -1.0, 0)); //set gravity for the rest of the program
 
 	sys = landerParticle.sys;
 	grav.set(ofVec3f(0, -1.0, 0));
@@ -165,7 +164,7 @@ void ofApp::update() {
 	// for the lander movement
 	grav.set(ofVec3f(0, -gravity, 0));
 	landerParticle.setParticleRadius(radius);
-
+	lander.integrate();
 
 	//TODO: should I be adding the particle integrator here?
 	// get velocity from slider
@@ -337,8 +336,11 @@ void ofApp::keyPressed(int key) {
 	case ' ': //apply up booster?
 		//sys->addForce(&grav);
 		//sys->addForce(new TurbulenceForce(ofVec3f(0, -1, 0), ofVec3f(0, 1, 0)));
-		sys->addForce(new ThrusterForce(ofVec3f(0, 1*thrustStr, 0)));
-		sys->addForce(&grav);
+		/*sys->addForce(new ThrusterForce(ofVec3f(0, 1*thrustStr, 0)));
+		sys->addForce(&grav);*/
+		lander.applyThrust(ofVec3f( 0, 1*thrustStr, 0)); //too strong?
+		//lander.applyGravity(); 
+
 		break;
 	case OF_KEY_UP: // forward
 		cout << "forward" << endl; 
@@ -421,7 +423,7 @@ void ofApp::keyPressed(int key) {
 		break;
 	case OF_KEY_SHIFT:				// release a particle
 		//landerParticle.start(); //TODO: How do we use this to relaunch the same particle more than once?
-		if (landerParticle.sys->particles.size() <= 0) { landerParticle.start(); }
+		//if (landerParticle.sys->particles.size() <= 0) { landerParticle.start(); } //TODO: uncomment to start the game?
 		break;
 	case OF_KEY_BACKSPACE:				// return particle to original pos
 		landerParticle.sys->particles[0].position = ofVec3f(1, 1, 0); 
