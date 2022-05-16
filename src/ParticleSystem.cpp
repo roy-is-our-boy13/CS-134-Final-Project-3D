@@ -27,6 +27,10 @@ void ParticleSystem::reset() {
 	}
 }
 
+void ParticleSystem::movement(const ofVec3f t, Particle* particle) { //supposed to be used to apply thrust forces to the lander
+	particle->forces = t;
+}
+
 void ParticleSystem::update() {
 	// check if empty and just return
 	if (particles.size() == 0) return;
@@ -45,8 +49,9 @@ void ParticleSystem::update() {
 				tmp = particles.erase(p);
 				p = tmp;
 			}
-			else p++;
+			else p++; 
 		}
+		else p++;
 	}
 
 	// update forces on all particles first 
@@ -55,16 +60,17 @@ void ParticleSystem::update() {
 		for (int k = 0; k < forces.size(); k++) {
 			if (!forces[k]->applied)
 				forces[k]->updateForce( &particles[i] );
+				//forces.erase(forces.begin()+k); //deletes forces as they are applied 
 		}
 	}
 
-	// update all forces only applied once to "applied"
-	// so they are not applied again.
-	//
-	for (int i = 0; i < forces.size(); i++) {
-		if (forces[i]->applyOnce)
-			forces[i]->applied = true;
-	}
+	//// update all forces only applied once to "applied"
+	//// so they are not applied again.
+	////
+	//for (int i = 0; i < forces.size(); i++) {
+	//	if (forces[i]->applyOnce)
+	//		forces[i]->applied = true;
+	//}
 
 	// integrate all the particles in the store
 	//
@@ -146,6 +152,5 @@ void CyclicForce::updateForce(Particle * particle) {
 }
 
 void ThrusterForce::updateForce(Particle * particle) {
-	cout << "update thrust force" << endl; 
-	particle->forces += thrust;
+	particle->forces = thrust;
 }

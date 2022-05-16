@@ -29,6 +29,8 @@ public:
 	void draw();
 	vector<Particle> particles;
 	vector<ParticleForce *> forces;
+
+	void movement(ofVec3f t, Particle*);
 };
 
 

@@ -76,7 +76,7 @@ void ofApp::setup(){
 	gui.setup();
 	gui.add(numLevels.setup("Number of Octree Levels", 1, 1, 10));
 	gui.add(velocity.setup("Initial Velocity", ofVec3f(25, 35, 0), ofVec3f(0, 0, 0), ofVec3f(100, 100, 100)));	// high on default, change to thruster?
-	gui.add(thrustStr.setup("Thrust", 10, 1, 20));
+	gui.add(thrustStr.setup("Thrust", 3, 1, 10));
 	gui.add(lifespan.setup("Lifespan", 2.0, .1, 10.0));
 	gui.add(rate.setup("Rate", 1.0, .5, 60.0));
 	gui.add(damping.setup("Damping", .99, .1, 1.0));
@@ -106,7 +106,7 @@ void ofApp::setup(){
 	landerParticle.setOneShot(true);
 
 	//landerParticle.start();
-	landerParticle.setLifespan(10);
+	landerParticle.setLifespan(20000);
 
 	sys = landerParticle.sys;
 	grav.set(ofVec3f(0, -1.0, 0));
@@ -336,9 +336,9 @@ void ofApp::keyPressed(int key) {
 	switch (key) {
 	case ' ': //apply up booster?
 		//sys->addForce(&grav);
-		//sys->addForce(new TurbulenceForce(ofVec3f(-3, -1, -1), ofVec3f(3, 1, 1)));
+		//sys->addForce(new TurbulenceForce(ofVec3f(0, -1, 0), ofVec3f(0, 1, 0)));
 		sys->addForce(new ThrusterForce(ofVec3f(0, 1*thrustStr, 0)));
-		//sys->addForce(&grav);
+		sys->addForce(&grav);
 		break;
 	case OF_KEY_UP: // forward
 		cout << "forward" << endl; 
@@ -446,7 +446,9 @@ void ofApp::togglePointsDisplay() {
 void ofApp::keyReleased(int key) {
 
 	switch (key) {
-	
+	case ' ':
+
+		break; 
 	case OF_KEY_ALT:
 		cam.disableMouseInput();
 		bAltKeyDown = false;
