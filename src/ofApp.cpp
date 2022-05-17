@@ -174,6 +174,7 @@ void ofApp::checkCollisions() { //TODO: currently this is off of particle positi
 		//cout << "AFTER ADDITION: " << lander.forces << endl;
 		//cout << "==============================================================================" << endl;
 	}
+  
 	// cout << "lander velocity: " << lander.velocity <<
 	// 	"\nlander.forces: " << lander.forces <<
 	// 	"\nAFTER ADDITION: " << lander.forces <<

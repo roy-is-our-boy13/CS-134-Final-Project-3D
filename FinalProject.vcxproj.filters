@@ -70,6 +70,9 @@
     <ClCompile Include="src\TransformObject.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\Lander.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -321,6 +324,12 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\TransformObject.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Lander.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\LanderSystem.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
