@@ -134,6 +134,7 @@ void ofApp::setup(){
 
 	// Setup 3 - Light System
 	// 
+	/*
 	keyLight.setup();
 	keyLight.enable();
 	keyLight.setAreaLight(1, 1);
@@ -168,7 +169,7 @@ void ofApp::setup(){
 	rimLight.setDiffuseColor(ofFloatColor(1, 1, 1));
 	rimLight.setSpecularColor(ofFloatColor(1, 1, 1));
 	rimLight.rotate(180, ofVec3f(0, 1, 0));
-	rimLight.setPosition(0, 5, -7);
+	rimLight.setPosition(0, 5, -7);*/
 
 }
 
