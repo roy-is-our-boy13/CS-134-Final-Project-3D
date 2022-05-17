@@ -45,9 +45,15 @@ class ofApp : public ofBaseApp{
 		void setCameraTarget();
 		bool mouseIntersectPlane(ofVec3f planePoint, ofVec3f planeNorm, ofVec3f &point);
 		bool raySelectWithOctree(ofVec3f &pointRet);
-		glm::vec3 ofApp::getMousePointOnPlane(glm::vec3 p , glm::vec3 n);
+		glm::vec3 getMousePointOnPlane(glm::vec3 p , glm::vec3 n);
 		void devMode(); 
-		void loadVbo();
+		void fuelDraw(); 
+
+		//for fuel 
+		float startTime; // store when we start time timer
+		float endTime; // when do want to stop the timer
+		
+		bool  bTimerReached; // used as a trigger when we hit the timer
 
 		ofEasyCam cam; // this is the main camera
 		ofCamera cam1, cam2; // these are the other camera views
@@ -86,18 +92,6 @@ class ofApp : public ofBaseApp{
 			ofxFloatSlider restitution;	// bounceback
 			ofxIntSlider thrustStr; // strength of the thrust, aka speed?
 
-
-			//////////////// rocket exhaust ////////////////
-			//TODO: turn some of these into regular variables, we don't need all of them on the gui 
-			ofxIntSlider numParticles;
-			ofxVec2Slider lifespanRange;
-			ofxVec3Slider turbMin;
-			ofxVec3Slider turbMax;
-			ofxFloatSlider mass;
-			ofxFloatSlider radialForceVal;
-			ofxFloatSlider radialHight;
-			ofxFloatSlider cyclicForceVal;
-
 			ofxFloatSlider camDistance; // this is the distance of the current camera view
 			ofxPanel gui;
 		
@@ -123,27 +117,6 @@ class ofApp : public ofBaseApp{
 
 		const float selectionRange = 4.0;
 
-		float startTime, endTime; 
-
 		ParticleSystem* sys;
 
-		//////////////// rocket exhaust ////////////////
-		// 
-		// Emitter and some forces;
-		//
-		ParticleEmitter emitter;
-
-		TurbulenceForce* turbForce;
-		GravityForce* gravityForce;
-		ImpulseRadialForce* radialForce;
-		CyclicForce* cyclicForce;
-
-		// textures
-		//
-		ofTexture  particleTex;
-
-		// shaders
-		//
-		ofVbo vbo;
-		ofShader shader;
 };

@@ -13,7 +13,7 @@ void Lander::integrate()
 	// update position based on velocity
 	//
 	position += (velocity * dt);
-	cout << "position += velocity*dt: " << position << endl; 
+	// cout << "position += velocity*dt: " << position << endl; 
 	this->setPosition(position.x, position.y, position.z);
 
 	// update acceleration with accumulated paritcles forces
@@ -21,7 +21,7 @@ void Lander::integrate()
 	//
 	ofVec3f accel = acceleration;    // start with any acceleration already on the Lander
 	accel += (forces * (1.0 / mass));
-	cout << "force on lander: " << forces << endl;
+	// cout << "force on lander: " << forces << endl;
 	velocity += accel * dt;
 
 	// add a little damping for good measure

@@ -12,7 +12,9 @@ public:
 	ofVec3f velocity;
 	ofVec3f acceleration;
 	ofVec3f forces;
+
 	bool unlimitedLife;
+
 	float	damping;
 	float   mass;
 	float   lifespan;

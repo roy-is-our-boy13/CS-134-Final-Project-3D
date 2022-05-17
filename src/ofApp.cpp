@@ -19,6 +19,10 @@
 // setup scene, lighting, state and load geometry
 //
 void ofApp::setup(){
+	bTimerReached = false;
+    startTime = ofGetElapsedTimeMillis();  // get the start time
+    endTime = 30000; // in milliseconds
+
 	bWireframe = false;
 	bDisplayPoints = false;
 	bAltKeyDown = false;
@@ -85,9 +89,9 @@ void ofApp::setup(){
 	//  Create Octree for testing.
 	//
 	
-	startTime = ofGetElapsedTimeMillis(); 
+	// startTime = ofGetElapsedTimeMillis(); 
 	octree.create(lunar.getMesh(0), 20);
-	endTime = ofGetElapsedTimeMillis() - startTime;
+	// endTime = ofGetElapsedTimeMillis() - startTime;
 	//cout << "Time to run Octree:: create: " << ofToString(endTime) << " milliseconds" << endl;
 	
 	//cout << "Number of Verts: " << mars.getMesh(0).getNumVertices() << endl;
@@ -169,10 +173,10 @@ void ofApp::checkCollisions() { //TODO: currently this is off of particle positi
 		//cout << "AFTER ADDITION: " << lander.forces << endl;
 		//cout << "==============================================================================" << endl;
 	}
-	cout << "lander velocity: " << lander.velocity <<
-		"\nlander.forces: " << lander.forces <<
-		"\nAFTER ADDITION: " << lander.forces <<
-		"\n==============================================================================" << endl;
+	// cout << "lander velocity: " << lander.velocity <<
+	// 	"\nlander.forces: " << lander.forces <<
+	// 	"\nAFTER ADDITION: " << lander.forces <<
+	// 	"\n==============================================================================" << endl;
 
 	//for (int i = 0; i < landerParticle.sys->particles.size(); i++) {
 
@@ -224,7 +228,7 @@ void ofApp::update() {
 //--------------------------------------------------------------
 void ofApp::draw() {
 
-	ofBackground(ofColor::black);
+	// ofBackground(ofColor::black);
 
 	glDepthMask(false);
 	if (!bHide) gui.draw();
@@ -232,7 +236,6 @@ void ofApp::draw() {
 
 	// cam.begin();
 	theCam->begin(); 
-
 
 	ofPushMatrix();
 	if (bWireframe) {                    // wireframe mode  (include axis)
@@ -354,6 +357,24 @@ void ofApp::draw() {
 
 	theCam->end();
 	// cam.end();
+
+	fuelDraw(); //to draw the fuel bar
+
+
+	//--
+	// Draw annotations (text, gui, etc)
+
+	// ofPushStyle();
+	// // ofDisableDepthTest();
+
+	// // draw some labels
+	// ofSetColor(255, 255, 255);
+	// ofDrawBitmapString("Press keys 1-4 to select a camera for main view", ofGetWidth()/2, 30);
+	
+	// ofPopStyle();
+	
+	//
+	//--
 }
 
 
@@ -549,9 +570,9 @@ void ofApp::mousePressed(int x, int y, int button) {
 
 		Box bounds = Box(Vector3(min.x, min.y, min.z), Vector3(max.x, max.y, max.z));
 
-		startTime = ofGetElapsedTimeMillis(); 
+		// startTime = ofGetElapsedTimeMillis(); 
 		bool hit = bounds.intersect(Ray(Vector3(origin.x, origin.y, origin.z), Vector3(mouseDir.x, mouseDir.y, mouseDir.z)), 0, 10000);
-		endTime = ofGetElapsedTimeMillis() - startTime;
+		// endTime = ofGetElapsedTimeMillis() - startTime;
 		//cout << "Time to run bounds.intersect: " << ofToString(endTime) << " milliseconds" << endl;
 
 		if (hit) {
@@ -578,9 +599,9 @@ bool ofApp::raySelectWithOctree(ofVec3f &pointRet) {
 	Ray ray = Ray(Vector3(rayPoint.x, rayPoint.y, rayPoint.z),
 		Vector3(rayDir.x, rayDir.y, rayDir.z));
 
-	startTime = ofGetElapsedTimeMillis(); 
+	// startTime = ofGetElapsedTimeMillis(); 
 	pointSelected = octree.intersect(ray, octree.root, selectedNode);
-	endTime = ofGetElapsedTimeMillis() - startTime;
+	// endTime = ofGetElapsedTimeMillis() - startTime;
 	//cout << "Time to run octree.intersect: " << ofToString(endTime) << " milliseconds" << endl;
 
 	if (pointSelected) {
@@ -617,9 +638,9 @@ void ofApp::mouseDragged(int x, int y, int button) {
 
 		colBoxList.clear();
 
-		startTime = ofGetElapsedTimeMillis(); 
+		// startTime = ofGetElapsedTimeMillis(); 
 		octree.intersect(bounds, octree.root, colBoxList);
-		endTime = ofGetElapsedTimeMillis() - startTime;
+		// endTime = ofGetElapsedTimeMillis() - startTime;
 		//cout << "Time to run octree.intersect: " << ofToString(endTime) << " milliseconds" << endl;
 
 		/*if (bounds.overlap(testBox)) {
@@ -836,7 +857,7 @@ glm::vec3 ofApp::getMousePointOnPlane(glm::vec3 planePt, glm::vec3 planeNorm) {
 	}
 	else return glm::vec3(0, 0, 0);
 }
-
+//--------------------------------------------------------------
 //	a state mode that enables the following user actions: 
 //	- pause gravity (TODO:)
 //	- drag lander (TODO:)
@@ -846,4 +867,54 @@ glm::vec3 ofApp::getMousePointOnPlane(glm::vec3 planePt, glm::vec3 planeNorm) {
 //	- ??? (More?)
 void ofApp::devMode(){ 
 
+}
+//--------------------------------------------------------------
+void ofApp::fuelDraw() {
+		// "Turns off depth testing so rendering happens in draw order rather than by z-depth. Turning off depth test is useful for combining 3d scenes with 2d overlays such as a control panel."
+		ofDisableDepthTest(); 
+		
+    float barWidth = 500;
+		
+    // update the timer this frame
+    float timer = ofGetElapsedTimeMillis() - startTime;
+    
+    if(timer >= endTime && !bTimerReached) {
+        bTimerReached = true;        
+        ofMessage msg("Timer Reached");
+        ofSendMessage(msg);
+				cout << "timer reached" << endl; 
+    }
+    
+    // the background to the progress bar
+    ofSetColor(255, 255, 255);
+		ofFill(); //without this, the program only draws an unfilled rectangle 
+    ofDrawRectangle((ofGetWidth()-barWidth)/2, ofGetHeight()-100, barWidth, 30);
+    
+    // draw the percent of the bar completed
+    float pct = ofMap(timer, 0.0, endTime, 0.0, 1.0, true);
+    ofSetHexColor(0xf02589);
+		ofFill(); //without this, the program only draws an unfilled rectangle 
+		// ofSetColor(255, 255, 255);
+    ofDrawRectangle((ofGetWidth()-barWidth)/2, ofGetHeight()-100, barWidth*pct, 30);
+
+    // write the percentage next to the bar
+    ofSetColor(255, 255, 255);
+    ofDrawBitmapString(ofToString(pct*100, 0)+"%", ((ofGetWidth()-barWidth)/2)+barWidth+10, (ofGetHeight()-80));
+    
+    // the timer was reached :)
+    if(bTimerReached) {
+        ofSetColor(255, 255, 255);
+        ofDrawBitmapString("Timer Reached!", (ofGetWidth()-100)/2, (ofGetHeight()-50));
+    }
+    
+    // some information about the timer
+    string  info  = "FPS:        "+ofToString(ofGetFrameRate(),0)+"\n";
+            info += "Start Time: "+ofToString(startTime, 1)+"\n";
+            info += "End Time:   "+ofToString(endTime/1000.0, 1)+" seconds\n";
+            info += "Timer:      "+ofToString(timer/1000.0, 1)+" seconds\n";
+            info += "Percentage: "+ofToString(pct*100, 1)+"%\n";
+            info += "\nPress ' ' to get a new random end time\n";
+    // ofSetColor(0);
+		ofSetColor(255, 255, 255);
+    ofDrawBitmapString(info, 20, 20);
 }
