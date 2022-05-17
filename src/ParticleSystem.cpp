@@ -67,10 +67,10 @@ void ParticleSystem::update() {
 	//// update all forces only applied once to "applied"
 	//// so they are not applied again.
 	////
-	//for (int i = 0; i < forces.size(); i++) {
-	//	if (forces[i]->applyOnce)
-	//		forces[i]->applied = true;
-	//}
+	for (int i = 0; i < forces.size(); i++) {
+		if (forces[i]->applyOnce)
+			forces[i]->applied = true;
+	}
 
 	// integrate all the particles in the store
 	//
