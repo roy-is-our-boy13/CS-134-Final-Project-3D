@@ -26,6 +26,26 @@ public:
 	void	setGravity(ofVec3f g);
 	void	applyGravity();
 	void	applyThrust(ofVec3f t);
-	
+	void	createParticles();
 	ParticleEmitter thrustEmitter;
+
+	ofLight light;
+
+	ofPlanePrimitive plane;
+	ofMaterial planeMaterial;
+
+
+	bool bModelLoaded = false;
+	bool bPlaneLoaded = false;
+	bool bWireFrame = false;
+	ofxPanel gui;
+	ofxToggle keyEnabled, fillEnabled, rimEnabled;
+
+	ofxVec3Slider keyPosition, keyDiffuse, keySpecular;
+
+	ofxVec3Slider fillPosition, fillDiffuse, fillSpecular;
+
+	ofxVec3Slider rimPosition, rimDiffuse, rimSpecular;
+
+	ofxFloatSlider planeShiningess;
 };

@@ -1,4 +1,7 @@
 #include "Lander.h"
+#include "ofApp.h"
+#include  "ofxAssimpModelLoader.h"
+#include "ofApp.cpp"
 
 
 // This is the actual integrator 
@@ -13,7 +16,7 @@ void Lander::integrate()
 	// update position based on velocity
 	//
 	position += (velocity * dt);
-	cout << "position += velocity*dt: " << position << endl; 
+	// cout << "position += velocity*dt: " << position << endl; 
 	this->setPosition(position.x, position.y, position.z);
 
 	// update acceleration with accumulated paritcles forces
@@ -21,7 +24,7 @@ void Lander::integrate()
 	//
 	ofVec3f accel = acceleration;    // start with any acceleration already on the Lander
 	accel += (forces * (1.0 / mass));
-	cout << "force on lander: " << forces << endl;
+	// cout << "force on lander: " << forces << endl;
 	velocity += accel * dt;
 
 	// add a little damping for good measure
@@ -33,6 +36,7 @@ void Lander::integrate()
 	//forces.set(0, 0, 0);
 	forces.set(gravity.x, gravity.y, gravity.z); //	We always have gravity, so reset it by reapplying the gravity?
 	thrustEmitter.setPosition(position);
+	light.setPosition(postion); 
 }
 
 //void Lander::setPosition(float x, float y, float z) {
@@ -56,4 +60,9 @@ void Lander::applyGravity() {
 //	applying the thrust from any direction
 void Lander::applyThrust(ofVec3f t) {
 	forces += t; 
+}
+
+void Lander::createParticles() 
+{
+	thrustEmitter.start();
 }

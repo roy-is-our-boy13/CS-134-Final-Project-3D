@@ -19,6 +19,11 @@
 // setup scene, lighting, state and load geometry
 //
 void ofApp::setup(){
+	bTimerReached = false;
+    startTime = ofGetElapsedTimeMillis();  // get the start time
+    endTime = 120000 + startTime; // two minutes
+		// endTime = 10000 + startTime;
+
 	bWireframe = false;
 	bDisplayPoints = false;
 	bAltKeyDown = false;
@@ -73,7 +78,7 @@ void ofApp::setup(){
 	gui.setup();
 	gui.add(numLevels.setup("Number of Octree Levels", 1, 1, 10));
 	gui.add(velocity.setup("Initial Velocity", ofVec3f(25, 35, 0), ofVec3f(0, 0, 0), ofVec3f(100, 100, 100)));	// high on default, change to thruster?
-	gui.add(thrustStr.setup("Thrust", 100, 100, 1000));
+	gui.add(thrustStr.setup("Thrust", 5, 10, 100));
 	gui.add(lifespan.setup("Lifespan", 2.0, .1, 10.0));
 	gui.add(rate.setup("Rate", 1.0, .5, 60.0));
 	gui.add(damping.setup("Damping", .99, .1, 1.0));
@@ -85,9 +90,9 @@ void ofApp::setup(){
 	//  Create Octree for testing.
 	//
 	
-	startTime = ofGetElapsedTimeMillis(); 
+	// startTime = ofGetElapsedTimeMillis(); 
 	octree.create(lunar.getMesh(0), 20);
-	endTime = ofGetElapsedTimeMillis() - startTime;
+	// endTime = ofGetElapsedTimeMillis() - startTime;
 	//cout << "Time to run Octree:: create: " << ofToString(endTime) << " milliseconds" << endl;
 	
 	//cout << "Number of Verts: " << mars.getMesh(0).getNumVertices() << endl;
@@ -111,6 +116,59 @@ void ofApp::setup(){
 	grav.set(ofVec3f(0, -1.0, 0));
 	sys->addForce(&grav);
 	//sys->addForce(new TurbulenceForce(ofVec3f(-3, -1, -1), ofVec3f(3, 1, 1)));
+	
+	//Lander Thrust Particles Setup.
+	lander.thrustEmitter.init();
+	lander.thrustEmitter.setLifespan(3);
+	lander.thrustEmitter.setRate(10);
+	lander.thrustEmitter.setVelocity(glm::vec3(0, -1, 0));
+	lander.thrustEmitter.setParticleRadius(radius);
+
+	cam.setDistance(10);
+	cam.setNearClip(.1);
+	cam.setFov(65.5);   // approx equivalent to 28mm in 35mm format
+//	ofSetVerticalSync(true);
+	cam.disableMouseInput();
+	ofEnableDepthTest();
+	ofEnableLighting();
+
+	// Setup 3 - Light System
+	// 
+	keyLight.setup();
+	keyLight.enable();
+	keyLight.setAreaLight(1, 1);
+	keyLight.setAmbientColor(ofFloatColor(0.1, 0.1, 0.1));
+	keyLight.setDiffuseColor(ofFloatColor(1, 1, 1));
+	keyLight.setSpecularColor(ofFloatColor(1, 1, 1));
+
+	keyLight.rotate(45, ofVec3f(0, 1, 0));
+	keyLight.rotate(-45, ofVec3f(1, 0, 0));
+	keyLight.setPosition(5, 5, 5);
+
+	fillLight.setup();
+	fillLight.enable();
+	fillLight.setSpotlight();
+	fillLight.setScale(.05);
+	fillLight.setSpotlightCutOff(15);
+	fillLight.setAttenuation(2, .001, .001);
+	fillLight.setAmbientColor(ofFloatColor(0.1, 0.1, 0.1));
+	fillLight.setDiffuseColor(ofFloatColor(1, 1, 1));
+	fillLight.setSpecularColor(ofFloatColor(1, 1, 1));
+	fillLight.rotate(-10, ofVec3f(1, 0, 0));
+	fillLight.rotate(-45, ofVec3f(0, 1, 0));
+	fillLight.setPosition(-5, 5, 5);
+
+	rimLight.setup();
+	rimLight.enable();
+	rimLight.setSpotlight();
+	rimLight.setScale(.05);
+	rimLight.setSpotlightCutOff(30);
+	rimLight.setAttenuation(.2, .001, .001);
+	rimLight.setAmbientColor(ofFloatColor(0.1, 0.1, 0.1));
+	rimLight.setDiffuseColor(ofFloatColor(1, 1, 1));
+	rimLight.setSpecularColor(ofFloatColor(1, 1, 1));
+	rimLight.rotate(180, ofVec3f(0, 1, 0));
+	rimLight.setPosition(0, 5, -7);
 
 }
 
@@ -152,6 +210,7 @@ void ofApp::checkCollisions() { //TODO: currently this is off of particle positi
 
 	//for (int j = 0 ; j < colBoxList.size() ; j++) {
 	if(colBoxList.size() > 0) { //We want this restiition force once if there is any collision
+		lander.setGravity(ofVec3f(0, 0, 0)); //set gravity to ZERO
 		ofVec3f vel = lander.velocity; //access the velocity of the lander for the restitution bounce
 		//cout << "lander velocity: " << vel << endl;
 
@@ -169,10 +228,15 @@ void ofApp::checkCollisions() { //TODO: currently this is off of particle positi
 		//cout << "AFTER ADDITION: " << lander.forces << endl;
 		//cout << "==============================================================================" << endl;
 	}
-	cout << "lander velocity: " << lander.velocity <<
-		"\nlander.forces: " << lander.forces <<
-		"\nAFTER ADDITION: " << lander.forces <<
-		"\n==============================================================================" << endl;
+	else
+	{
+		lander.setGravity(ofVec3f(0, -1.0, 0)); //set gravity for the rest of the program
+
+	}
+	// cout << "lander velocity: " << lander.velocity <<
+	// 	"\nlander.forces: " << lander.forces <<
+	// 	"\nAFTER ADDITION: " << lander.forces <<
+	// 	"\n==============================================================================" << endl;
 
 	//for (int i = 0; i < landerParticle.sys->particles.size(); i++) {
 
@@ -198,7 +262,8 @@ void ofApp::checkCollisions() { //TODO: currently this is off of particle positi
 //--------------------------------------------------------------
 // incrementally update scene (animation)
 //
-void ofApp::update() {
+void ofApp::update() 
+{
 	checkCollisions();
 
 	// for the lander movement
@@ -220,6 +285,8 @@ void ofApp::update() {
 
 	//	lander.setPosition(vel.x, vel.y, vel.z);
 	//}
+
+	lander.thrustEmitter.update();
 }
 //--------------------------------------------------------------
 void ofApp::draw() {
@@ -232,7 +299,6 @@ void ofApp::draw() {
 
 	// cam.begin();
 	theCam->begin(); 
-
 
 	ofPushMatrix();
 	if (bWireframe) {                    // wireframe mode  (include axis)
@@ -295,6 +361,7 @@ void ofApp::draw() {
 					Octree::drawBox(colBoxList[i]);
 				}
 			}
+			lander.thrustEmitter.draw();
 		}
 	}
 	if (bTerrainSelected) drawAxis(ofVec3f(0, 0, 0));
@@ -354,6 +421,24 @@ void ofApp::draw() {
 
 	theCam->end();
 	// cam.end();
+
+	fuelDraw(); //to draw the fuel bar
+
+
+	//--
+	// Draw annotations (text, gui, etc)
+
+	// ofPushStyle();
+	// // ofDisableDepthTest();
+
+	// // draw some labels
+	// ofSetColor(255, 255, 255);
+	// ofDrawBitmapString("Press keys 1-4 to select a camera for main view", ofGetWidth()/2, 30);
+	
+	// ofPopStyle();
+	
+	//
+	//--
 }
 
 
@@ -386,29 +471,28 @@ void ofApp::drawAxis(ofVec3f location) {
 
 void ofApp::keyPressed(int key) {
 
-	switch (key) {
+	switch (key) { //TODO: thrust strength might be too strong at the moment, or the gravity is too weak
 	case ' ': //apply up booster
-		lander.applyThrust(ofVec3f( 0, 1*thrustStr, 0)); //too strong?
+		landerMovement(ofVec3f(0, 1*thrustStr, 0)); 
 		//Tell lander to create particles with its thrust emitter
 		//lander needs a new method that handles creating particles.
+		lander.createParticles();
 		break;
 	case OF_KEY_UP: // forward
 		cout << "forward" << endl; 
-		lander.applyThrust(ofVec3f(0, 0, -1 * thrustStr));
+		landerMovement(ofVec3f(0, 0, -1 * thrustStr)); 
 		break; 
 	case OF_KEY_LEFT: // left
 		cout << "left" << endl;
-		lander.applyThrust(ofVec3f(-1 * thrustStr, 0, 0));
+		landerMovement(ofVec3f(-1 * thrustStr, 0, 0)); 
 		break;
 	case OF_KEY_DOWN: // back
-		//TODO: change to back, it's currently down
 		cout << "back" << endl;
-		//lander.applyThrust(ofVec3f(0, -1*thrustStr, 0));
-		lander.applyThrust(ofVec3f(0, 0, 1 * thrustStr));
+		landerMovement(ofVec3f(0, 0, 1 * thrustStr));
 		break;
 	case OF_KEY_RIGHT: // right
 		cout << "right" << endl;
-		lander.applyThrust(ofVec3f(1 * thrustStr, 0, 0));
+		landerMovement(ofVec3f(1 * thrustStr, 0, 0)); 
 		break;
 	case 'B':
 	case 'b':
@@ -502,9 +586,26 @@ void ofApp::togglePointsDisplay() {
 void ofApp::keyReleased(int key) {
 
 	switch (key) {
-	case ' ':
-
+	case ' ': 
+		timerStarted = false; // we stopped using the thruster
+		activeEnd = timer; // remember the amount of fuel we spent
+		break;
+	case OF_KEY_UP: // forward
+		timerStarted = false; // we stopped using the thruster
+		activeEnd = timer; // remember the amount of fuel we spent
 		break; 
+	case OF_KEY_LEFT: // left
+		timerStarted = false; // we stopped using the thruster
+		activeEnd = timer; // remember the amount of fuel we spent
+		break;
+	case OF_KEY_DOWN: // back
+		timerStarted = false; // we stopped using the thruster
+		activeEnd = timer; // remember the amount of fuel we spent
+		break;
+	case OF_KEY_RIGHT: // right
+		timerStarted = false; // we stopped using the thruster
+		activeEnd = timer; // remember the amount of fuel we spent
+		break;
 	case OF_KEY_ALT:
 		cam.disableMouseInput();
 		bAltKeyDown = false;
@@ -549,9 +650,9 @@ void ofApp::mousePressed(int x, int y, int button) {
 
 		Box bounds = Box(Vector3(min.x, min.y, min.z), Vector3(max.x, max.y, max.z));
 
-		startTime = ofGetElapsedTimeMillis(); 
+		// startTime = ofGetElapsedTimeMillis(); 
 		bool hit = bounds.intersect(Ray(Vector3(origin.x, origin.y, origin.z), Vector3(mouseDir.x, mouseDir.y, mouseDir.z)), 0, 10000);
-		endTime = ofGetElapsedTimeMillis() - startTime;
+		// endTime = ofGetElapsedTimeMillis() - startTime;
 		//cout << "Time to run bounds.intersect: " << ofToString(endTime) << " milliseconds" << endl;
 
 		if (hit) {
@@ -578,9 +679,9 @@ bool ofApp::raySelectWithOctree(ofVec3f &pointRet) {
 	Ray ray = Ray(Vector3(rayPoint.x, rayPoint.y, rayPoint.z),
 		Vector3(rayDir.x, rayDir.y, rayDir.z));
 
-	startTime = ofGetElapsedTimeMillis(); 
+	// startTime = ofGetElapsedTimeMillis(); 
 	pointSelected = octree.intersect(ray, octree.root, selectedNode);
-	endTime = ofGetElapsedTimeMillis() - startTime;
+	// endTime = ofGetElapsedTimeMillis() - startTime;
 	//cout << "Time to run octree.intersect: " << ofToString(endTime) << " milliseconds" << endl;
 
 	if (pointSelected) {
@@ -617,9 +718,9 @@ void ofApp::mouseDragged(int x, int y, int button) {
 
 		colBoxList.clear();
 
-		startTime = ofGetElapsedTimeMillis(); 
+		// startTime = ofGetElapsedTimeMillis(); 
 		octree.intersect(bounds, octree.root, colBoxList);
-		endTime = ofGetElapsedTimeMillis() - startTime;
+		// endTime = ofGetElapsedTimeMillis() - startTime;
 		//cout << "Time to run octree.intersect: " << ofToString(endTime) << " milliseconds" << endl;
 
 		/*if (bounds.overlap(testBox)) {
@@ -836,7 +937,7 @@ glm::vec3 ofApp::getMousePointOnPlane(glm::vec3 planePt, glm::vec3 planeNorm) {
 	}
 	else return glm::vec3(0, 0, 0);
 }
-
+//--------------------------------------------------------------
 //	a state mode that enables the following user actions: 
 //	- pause gravity (TODO:)
 //	- drag lander (TODO:)
@@ -846,4 +947,55 @@ glm::vec3 ofApp::getMousePointOnPlane(glm::vec3 planePt, glm::vec3 planeNorm) {
 //	- ??? (More?)
 void ofApp::devMode(){ 
 
+}
+//--------------------------------------------------------------
+void ofApp::fuelDraw() {
+		// "Turns off depth testing so rendering happens in draw order rather than by z-depth. Turning off depth test is useful for combining 3d scenes with 2d overlays such as a control panel."
+		ofDisableDepthTest(); 
+		
+    float barWidth = 500;
+
+		if (timerStarted){ //currently holding down the thrusters
+			timer = startTime + activeStart + activeEnd; 
+			//if thrusters being applied, see how much is being drained
+		}
+    
+    if(timer >= endTime && !bTimerReached) {
+        bTimerReached = true;        
+        ofMessage msg("Timer Reached");
+        ofSendMessage(msg);
+				cout << "timer reached" << endl; 
+    }
+    
+    // the background to the progress bar
+    ofSetColor(105,105,105);
+		ofFill(); //without this, the program only draws an unfilled rectangle 
+    ofDrawRectangle((ofGetWidth()-barWidth)/2, ofGetHeight()-100, barWidth, 30);
+    
+    // draw the percent of the bar completed
+    float pct = ofMap(timer, 0.0, endTime, 0.0, 1.0, true);
+    ofSetHexColor(0xf02589);
+		ofFill(); //without this, the program only draws an unfilled rectangle 
+		ofDrawRectangle((ofGetWidth()-barWidth)/2, ofGetHeight()-100, barWidth-barWidth*pct, 30);
+
+    // write the percentage next to the bar
+    ofSetColor(255, 255, 255);
+    ofDrawBitmapString(ofToString((1-pct)*100, 0)+"%", (ofGetWidth()/2), (ofGetHeight()-80)); //should we change this to a timer instead of a percent?
+    
+    // the timer was reached :)
+    if(bTimerReached) {
+        ofSetColor(255, 255, 255);
+        ofDrawBitmapString("Out of fuel!", (ofGetWidth()-100)/2, (ofGetHeight()-50));
+				//TODO: this is the lose condition, need to code the loss
+    }
+}
+//--------------------------------------------------------------
+//take the movement input dictated by the key pressed, then apply the timer
+void ofApp::landerMovement(ofVec3f m){
+	if (!timerStarted){ // only reset when we're applying thrust for the first time (not repeatedly)
+		ofResetElapsedTimeCounter();  
+		timerStarted = true; 
+	}
+	activeStart = ofGetElapsedTimeMillis(); // see how long we're holding the thrust down
+	lander.applyThrust(m);
 }
