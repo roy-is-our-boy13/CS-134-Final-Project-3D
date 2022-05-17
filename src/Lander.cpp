@@ -3,7 +3,8 @@
 
 // This is the actual integrator 
 //
-void Lander::integrate() {
+void Lander::integrate() 
+{
 	float framerate = ofGetFrameRate();
 	if (framerate < 1.0) return;
 
@@ -20,6 +21,7 @@ void Lander::integrate() {
 	//
 	ofVec3f accel = acceleration;    // start with any acceleration already on the Lander
 	accel += (forces * (1.0 / mass));
+	cout << "force on lander: " << forces << endl;
 	velocity += accel * dt;
 
 	// add a little damping for good measure
@@ -30,6 +32,7 @@ void Lander::integrate() {
 	//
 	//forces.set(0, 0, 0);
 	forces.set(gravity.x, gravity.y, gravity.z); //	We always have gravity, so reset it by reapplying the gravity?
+	thrustEmitter.setPosition(position);
 }
 
 //void Lander::setPosition(float x, float y, float z) {

@@ -2,6 +2,7 @@
 
 #include  "ofxAssimpModelLoader.h"
 #include "ofMain.h"
+#include "ParticleEmitter.h"
 
 // This extends ofxAssimpModelLoader, so it should have all of the same methods to start
 // this makes the implementation much easier (nothing to change in ofApp.cpp)
@@ -25,4 +26,6 @@ public:
 	void	setGravity(ofVec3f g);
 	void	applyGravity();
 	void	applyThrust(ofVec3f t);
+	
+	ParticleEmitter thrustEmitter;
 };
