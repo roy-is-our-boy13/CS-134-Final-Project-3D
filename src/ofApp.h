@@ -52,9 +52,10 @@ class ofApp : public ofBaseApp{
 		//for fuel 
 		float startTime; // store when we start time timer
 		float endTime; // when do want to stop the timer
-		float activeStart; // calculates current time when user applies fuel/thrusters
-		float activeEnd; // calculates current time when user stops applying fuel/thrusters
+		float activeStart = 0; // calculates current time when user applies fuel/thrusters
+		float activeEnd = 0; // holds the value of the timer the last time it was set 
 		float timer = 0; //for calculations with fuel 
+		bool timerStarted = false; 
 		
 		bool  bTimerReached; // used as a trigger when we hit the timer
 

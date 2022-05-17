@@ -21,7 +21,8 @@
 void ofApp::setup(){
 	bTimerReached = false;
     startTime = ofGetElapsedTimeMillis();  // get the start time
-    endTime = 10000; // ten seconds 
+    // endTime = 120000 + startTime; // two minutes
+		endTime = 10000 + startTime;
 
 	bWireframe = false;
 	bDisplayPoints = false;
@@ -409,7 +410,14 @@ void ofApp::keyPressed(int key) {
 
 	switch (key) {
 	case ' ': //apply up booster
+		if (!timerStarted){
+			// activeStart = ofGetElapsedTimeMillis();
+			// cout << "activeStart: " << activeStart << endl;
+			ofResetElapsedTimeCounter();  
+			timerStarted = true; 
+		}
 		activeStart = ofGetElapsedTimeMillis();
+		// cout << "activeStart: " << activeStart << endl; 
 		lander.applyThrust(ofVec3f( 0, 1*thrustStr, 0)); //too strong?
 		//Tell lander to create particles with its thrust emitter
 		//lander needs a new method that handles creating particles.
@@ -525,7 +533,13 @@ void ofApp::keyReleased(int key) {
 
 	switch (key) {
 	case ' ': //apply up booster
-		activeEnd = ofGetElapsedTimeMillis();
+		// activeEnd = ofGetElapsedTimeMillis();
+		// cout << "activeEnd: " << activeEnd << endl; 
+		// // timer += activeEnd - activeStart; 
+		// cout << "timer: " <<  timer << endl; 
+		timerStarted = false; 
+		activeEnd = timer; 
+		// ofResetElapsedTimeCounter(); 
 		break;
 	case OF_KEY_UP: // forward
 		break; 
@@ -883,10 +897,19 @@ void ofApp::fuelDraw() {
 		ofDisableDepthTest(); 
 		
     float barWidth = 500;
-		
-    // update the timer this frame
-    timer = ofGetElapsedTimeMillis() - startTime;
-		// timer += activeEnd - activeStart; 
+
+		if (timerStarted){ //currently holding down the thrusters
+			timer = startTime + activeStart + activeEnd; 
+			// If I do this version, it drains way too quickly 
+			// timer += ofGetElapsedTimeMillis() - activeStart; 
+		}
+
+		// right now, holding down the spacebar makes it count down correctly, but if you apply the thrusters again after shutting them off, it'll start over
+		// if (timerStarted){ //currently holding down the thrusters
+		// 	timer = ofGetElapsedTimeMillis() - activeStart; 
+		// 	// If I do this version, it drains way too quickly 
+		// 	// timer += ofGetElapsedTimeMillis() - activeStart; 
+		// }
     
     if(timer >= endTime && !bTimerReached) {
         bTimerReached = true;        
