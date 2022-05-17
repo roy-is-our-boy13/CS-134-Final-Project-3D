@@ -21,7 +21,7 @@
 void ofApp::setup(){
 	bTimerReached = false;
     startTime = ofGetElapsedTimeMillis();  // get the start time
-    endTime = 30000; // in milliseconds
+    endTime = 10000; // ten seconds 
 
 	bWireframe = false;
 	bDisplayPoints = false;
@@ -409,6 +409,7 @@ void ofApp::keyPressed(int key) {
 
 	switch (key) {
 	case ' ': //apply up booster
+		activeStart = ofGetElapsedTimeMillis();
 		lander.applyThrust(ofVec3f( 0, 1*thrustStr, 0)); //too strong?
 		//Tell lander to create particles with its thrust emitter
 		//lander needs a new method that handles creating particles.
@@ -523,9 +524,17 @@ void ofApp::togglePointsDisplay() {
 void ofApp::keyReleased(int key) {
 
 	switch (key) {
-	case ' ':
-
+	case ' ': //apply up booster
+		activeEnd = ofGetElapsedTimeMillis();
+		break;
+	case OF_KEY_UP: // forward
 		break; 
+	case OF_KEY_LEFT: // left
+		break;
+	case OF_KEY_DOWN: // back
+		break;
+	case OF_KEY_RIGHT: // right
+		break;
 	case OF_KEY_ALT:
 		cam.disableMouseInput();
 		bAltKeyDown = false;
@@ -876,7 +885,8 @@ void ofApp::fuelDraw() {
     float barWidth = 500;
 		
     // update the timer this frame
-    float timer = ofGetElapsedTimeMillis() - startTime;
+    timer = ofGetElapsedTimeMillis() - startTime;
+		// timer += activeEnd - activeStart; 
     
     if(timer >= endTime && !bTimerReached) {
         bTimerReached = true;        
@@ -886,7 +896,7 @@ void ofApp::fuelDraw() {
     }
     
     // the background to the progress bar
-    ofSetColor(255, 255, 255);
+    ofSetColor(105,105,105);
 		ofFill(); //without this, the program only draws an unfilled rectangle 
     ofDrawRectangle((ofGetWidth()-barWidth)/2, ofGetHeight()-100, barWidth, 30);
     
@@ -894,17 +904,16 @@ void ofApp::fuelDraw() {
     float pct = ofMap(timer, 0.0, endTime, 0.0, 1.0, true);
     ofSetHexColor(0xf02589);
 		ofFill(); //without this, the program only draws an unfilled rectangle 
-		// ofSetColor(255, 255, 255);
-    ofDrawRectangle((ofGetWidth()-barWidth)/2, ofGetHeight()-100, barWidth*pct, 30);
+		ofDrawRectangle((ofGetWidth()-barWidth)/2, ofGetHeight()-100, barWidth-barWidth*pct, 30);
 
     // write the percentage next to the bar
     ofSetColor(255, 255, 255);
-    ofDrawBitmapString(ofToString(pct*100, 0)+"%", ((ofGetWidth()-barWidth)/2)+barWidth+10, (ofGetHeight()-80));
+    ofDrawBitmapString(ofToString((1-pct)*100, 0)+"%", (ofGetWidth()/2), (ofGetHeight()-80)); //should we change this to a timer instead of a percent?
     
     // the timer was reached :)
     if(bTimerReached) {
         ofSetColor(255, 255, 255);
-        ofDrawBitmapString("Timer Reached!", (ofGetWidth()-100)/2, (ofGetHeight()-50));
+        ofDrawBitmapString("Out of fuel!", (ofGetWidth()-100)/2, (ofGetHeight()-50));
     }
     
     // some information about the timer
