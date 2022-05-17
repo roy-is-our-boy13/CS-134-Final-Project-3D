@@ -45,8 +45,20 @@ class ofApp : public ofBaseApp{
 		void setCameraTarget();
 		bool mouseIntersectPlane(ofVec3f planePoint, ofVec3f planeNorm, ofVec3f &point);
 		bool raySelectWithOctree(ofVec3f &pointRet);
-		glm::vec3 ofApp::getMousePointOnPlane(glm::vec3 p , glm::vec3 n);
+		glm::vec3 getMousePointOnPlane(glm::vec3 p , glm::vec3 n);
 		void devMode(); 
+		void fuelDraw(); 
+		void landerMovement(ofVec3f m); 
+
+		//for fuel 
+		float startTime; // store when we start time timer
+		float endTime; // when do want to stop the timer
+		float activeStart = 0; // calculates current time when user applies fuel/thrusters
+		float activeEnd = 0; // holds the value of the timer the last time it was set 
+		float timer = 0; //for calculations with fuel 
+		bool timerStarted = false; 
+		
+		bool  bTimerReached; // used as a trigger when we hit the timer
 
 		ofEasyCam cam; // this is the main camera
 		ofCamera cam1, cam2; // these are the other camera views
@@ -109,8 +121,6 @@ class ofApp : public ofBaseApp{
 		vector<Box> bboxList;
 
 		const float selectionRange = 4.0;
-
-		float startTime, endTime; 
 
 		ParticleSystem* sys;
 
