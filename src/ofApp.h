@@ -11,7 +11,7 @@
 #include "Particle.h"
 #include "ParticleEmitter.h"
 
-#include "Lander.h"
+#include "Lander.h" 
 //** Particle system and gravity end **//
 
 
@@ -57,12 +57,12 @@ class ofApp : public ofBaseApp{
 		Lander lander; 
 
 		ofLight light;
-		Box boundingBox, landerBounds;
+		Box boundingBox, landerBounds; 
 		Box testBox;
 		vector<Box> colBoxList;
 		bool bLanderSelected = false;
 		Octree octree;
-		TreeNode selectedNode;
+		TreeNode selectedNode; 
 		glm::vec3 mouseDownPos, mouseLastPos;
 		bool bInDrag = false;
 
@@ -86,7 +86,7 @@ class ofApp : public ofBaseApp{
 			ofxIntSlider thrustStr; // strength of the thrust, aka speed?
 
 			ofxFloatSlider camDistance; // this is the distance of the current camera view
-		ofxPanel gui;
+			ofxPanel gui;
 		
 
 		bool bAltKeyDown;

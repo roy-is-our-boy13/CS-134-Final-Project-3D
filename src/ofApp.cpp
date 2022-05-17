@@ -150,24 +150,29 @@ void ofApp::checkCollisions() { //TODO: currently this is off of particle positi
 
 	octree.intersect(bounds, octree.root, colBoxList); //colBoxList describes the octree boxes that the lander is colliding with
 
-	for (int j = 0 ; j < colBoxList.size() ; j++) { //for each box that's colliding, 
+	//for (int j = 0 ; j < colBoxList.size() ; j++) {
+	if(colBoxList.size() > 0) { //We want this restiition force once if there is any collision
 		ofVec3f vel = lander.velocity; //access the velocity of the lander for the restitution bounce
-		cout << "lander velocity: " << vel << endl;
+		//cout << "lander velocity: " << vel << endl;
 
 		// apply impulse function
 		//
 		ofVec3f norm = ofVec3f(0, 1, 0);  // TODO: this should be normalizing the mesh/vertices(?)
 		ofVec3f f = (restitution + 1.0) * ((-vel.dot(norm)) * norm);
-		cout << "f: " << f << endl; //the force we're applying to the lander
-		cout << "lander.forces: " << lander.forces << endl;
+		//cout << "f: " << f << endl; //the force we're applying to the lander
+		//cout << "lander.forces: " << lander.forces << endl;
 		//cout << "ofGetFrameRate() * f: " << ofGetFrameRate() * f << endl;
 		//lander.forces += ofGetFrameRate() * f
 		lander.forces += f; //doing it without frame rate to see what happens?
-		lander.integrate(); 
+		//lander.integrate();//Let the update cycle take care of intagrating forces
 
-		cout << "AFTER ADDITION: " << lander.forces << endl;
-		cout << "==============================================================================" << endl;
+		//cout << "AFTER ADDITION: " << lander.forces << endl;
+		//cout << "==============================================================================" << endl;
 	}
+	cout << "lander velocity: " << lander.velocity <<
+		"\nlander.forces: " << lander.forces <<
+		"\nAFTER ADDITION: " << lander.forces <<
+		"\n==============================================================================" << endl;
 
 	//for (int i = 0; i < landerParticle.sys->particles.size(); i++) {
 
@@ -199,7 +204,7 @@ void ofApp::update() {
 	// for the lander movement
 	grav.set(ofVec3f(0, -gravity, 0));
 	landerParticle.setParticleRadius(radius);
-	lander.setGravity(ofVec3f(0, -gravity, 0)); //update gravity 
+	//lander.setGravity(ofVec3f(0, -gravity, 0)); //Don't need to update gravity on every update:-)
 	lander.integrate();
 
 	//TODO: should I be adding the particle integrator here?
@@ -384,6 +389,8 @@ void ofApp::keyPressed(int key) {
 	switch (key) {
 	case ' ': //apply up booster
 		lander.applyThrust(ofVec3f( 0, 1*thrustStr, 0)); //too strong?
+		//Tell lander to create particles with its thrust emitter
+		//lander needs a new method that handles creating particles.
 		break;
 	case OF_KEY_UP: // forward
 		cout << "forward" << endl; 
@@ -403,7 +410,6 @@ void ofApp::keyPressed(int key) {
 		cout << "right" << endl;
 		lander.applyThrust(ofVec3f(1 * thrustStr, 0, 0));
 		break;
-
 	case 'B':
 	case 'b':
 		bDisplayBBoxes = !bDisplayBBoxes;
