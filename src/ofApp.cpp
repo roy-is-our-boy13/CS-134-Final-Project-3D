@@ -18,16 +18,16 @@
 //--------------------------------------------------------------
 // setup scene, lighting, state and load geometry
 //
-void ofApp::setup(){
+void ofApp::setup() {
 	bWireframe = false;
 	bDisplayPoints = false;
 	bAltKeyDown = false;
 	bCtrlKeyDown = false;
 	bLanderLoaded = false;
 	bTerrainSelected = true;
-//	ofSetWindowShape(1024, 768);
-// 
-	//TODO: What do we want the intial camera distance to be?
+	//	ofSetWindowShape(1024, 768);
+	// 
+		//TODO: What do we want the intial camera distance to be?
 	cam.setDistance(75);
 
 	//TODO: this has a weird reaction to having the different cameras
@@ -56,7 +56,7 @@ void ofApp::setup(){
 
 
 	//Loading lander without drag+drop
-	if (lander.loadModel("geo/lander.obj")){
+	if (lander.loadModel("geo/lander.obj")) {
 		lander.setScaleNormalization(false);
 		lander.setPosition(1, 2, 0);
 
@@ -77,19 +77,19 @@ void ofApp::setup(){
 	gui.add(lifespan.setup("Lifespan", 2.0, .1, 10.0));
 	gui.add(rate.setup("Rate", 1.0, .5, 60.0));
 	gui.add(damping.setup("Damping", .99, .1, 1.0));
-    gui.add(gravity.setup("Gravity", 0, 0, 20));
+	gui.add(gravity.setup("Gravity", 0, 0, 20));
 	gui.add(radius.setup("Radius", .1, .01, 1.0));
 	gui.add(restitution.setup("Restitution", .85, 0, 1.0));
 	bHide = false;
 
 	//  Create Octree for testing.
 	//
-	
-	startTime = ofGetElapsedTimeMillis(); 
+
+	startTime = ofGetElapsedTimeMillis();
 	octree.create(lunar.getMesh(0), 20);
 	endTime = ofGetElapsedTimeMillis() - startTime;
 	//cout << "Time to run Octree:: create: " << ofToString(endTime) << " milliseconds" << endl;
-	
+
 	//cout << "Number of Verts: " << mars.getMesh(0).getNumVertices() << endl;
 
 	testBox = Box(Vector3(3, 3, 0), Vector3(5, 5, 2));
@@ -150,7 +150,7 @@ void ofApp::checkCollisions() { //TODO: currently this is off of particle positi
 
 	octree.intersect(bounds, octree.root, colBoxList); //colBoxList describes the octree boxes that the lander is colliding with
 
-	for (int j = 0 ; j < colBoxList.size() ; j++) { //for each box that's colliding, 
+	for (int j = 0; j < colBoxList.size(); j++) { //for each box that's colliding, 
 		ofVec3f vel = lander.velocity; //access the velocity of the lander for the restitution bounce
 		cout << "lander velocity: " << vel << endl;
 
@@ -163,7 +163,7 @@ void ofApp::checkCollisions() { //TODO: currently this is off of particle positi
 		//cout << "ofGetFrameRate() * f: " << ofGetFrameRate() * f << endl;
 		//lander.forces += ofGetFrameRate() * f
 		lander.forces += f; //doing it without frame rate to see what happens?
-		lander.integrate(); 
+		lander.integrate();
 
 		cout << "AFTER ADDITION: " << lander.forces << endl;
 		cout << "==============================================================================" << endl;
@@ -189,7 +189,7 @@ void ofApp::checkCollisions() { //TODO: currently this is off of particle positi
 	//}
 
 }
- 
+
 //--------------------------------------------------------------
 // incrementally update scene (animation)
 //
@@ -226,7 +226,7 @@ void ofApp::draw() {
 	glDepthMask(true);
 
 	// cam.begin();
-	theCam->begin(); 
+	theCam->begin();
 
 
 	ofPushMatrix();
@@ -319,7 +319,7 @@ void ofApp::draw() {
 	if (bDisplayLeafNodes) {
 		octree.drawLeafNodes(octree.root);
 		//cout << "num leaf: " << octree.numLeaf << endl;
-    }
+	}
 	else if (bDisplayOctree) {
 		ofNoFill();
 		ofSetColor(ofColor::white);
@@ -341,7 +341,7 @@ void ofApp::draw() {
 	landerParticle.draw(); //particle(?) for the lander movement
 
 	ofPopMatrix();
-	
+
 	//TODO: draw these?
 	/*cam.draw();
 	cam1.draw();
@@ -365,7 +365,7 @@ void ofApp::drawAxis(ofVec3f location) {
 	// X Axis
 	ofSetColor(ofColor(255, 0, 0));
 	ofDrawLine(ofPoint(0, 0, 0), ofPoint(1, 0, 0));
-	
+
 
 	// Y Axis
 	ofSetColor(ofColor(0, 255, 0));
@@ -383,12 +383,12 @@ void ofApp::keyPressed(int key) {
 
 	switch (key) {
 	case ' ': //apply up booster
-		lander.applyThrust(ofVec3f( 0, 1*thrustStr, 0)); //too strong?
+		lander.applyThrust(ofVec3f(0, 1 * thrustStr, 0)); //too strong?
 		break;
 	case OF_KEY_UP: // forward
-		cout << "forward" << endl; 
+		cout << "forward" << endl;
 		lander.applyThrust(ofVec3f(0, 0, -1 * thrustStr));
-		break; 
+		break;
 	case OF_KEY_LEFT: // left
 		cout << "left" << endl;
 		lander.applyThrust(ofVec3f(-1 * thrustStr, 0, 0));
@@ -498,7 +498,7 @@ void ofApp::keyReleased(int key) {
 	switch (key) {
 	case ' ':
 
-		break; 
+		break;
 	case OF_KEY_ALT:
 		cam.disableMouseInput();
 		bAltKeyDown = false;
@@ -515,9 +515,9 @@ void ofApp::keyReleased(int key) {
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseMoved(int x, int y ){
+void ofApp::mouseMoved(int x, int y) {
 
-	
+
 }
 
 //--------------------------------------------------------------
@@ -543,7 +543,7 @@ void ofApp::mousePressed(int x, int y, int button) {
 
 		Box bounds = Box(Vector3(min.x, min.y, min.z), Vector3(max.x, max.y, max.z));
 
-		startTime = ofGetElapsedTimeMillis(); 
+		startTime = ofGetElapsedTimeMillis();
 		bool hit = bounds.intersect(Ray(Vector3(origin.x, origin.y, origin.z), Vector3(mouseDir.x, mouseDir.y, mouseDir.z)), 0, 10000);
 		endTime = ofGetElapsedTimeMillis() - startTime;
 		//cout << "Time to run bounds.intersect: " << ofToString(endTime) << " milliseconds" << endl;
@@ -564,7 +564,7 @@ void ofApp::mousePressed(int x, int y, int button) {
 	}
 }
 
-bool ofApp::raySelectWithOctree(ofVec3f &pointRet) {
+bool ofApp::raySelectWithOctree(ofVec3f& pointRet) {
 	ofVec3f mouse(mouseX, mouseY);
 	ofVec3f rayPoint = cam.screenToWorld(mouse);
 	ofVec3f rayDir = rayPoint - cam.getPosition();
@@ -572,7 +572,7 @@ bool ofApp::raySelectWithOctree(ofVec3f &pointRet) {
 	Ray ray = Ray(Vector3(rayPoint.x, rayPoint.y, rayPoint.z),
 		Vector3(rayDir.x, rayDir.y, rayDir.z));
 
-	startTime = ofGetElapsedTimeMillis(); 
+	startTime = ofGetElapsedTimeMillis();
 	pointSelected = octree.intersect(ray, octree.root, selectedNode);
 	endTime = ofGetElapsedTimeMillis() - startTime;
 	//cout << "Time to run octree.intersect: " << ofToString(endTime) << " milliseconds" << endl;
@@ -580,8 +580,8 @@ bool ofApp::raySelectWithOctree(ofVec3f &pointRet) {
 	if (pointSelected) {
 		pointRet = octree.mesh.getVertex(selectedNode.points[0]);
 	}
-	
-	cout << "touching the lander:" << pointSelected << endl; 
+
+	cout << "touching the lander:" << pointSelected << endl;
 	return pointSelected;
 }
 
@@ -599,7 +599,7 @@ void ofApp::mouseDragged(int x, int y, int button) {
 
 		glm::vec3 mousePos = getMousePointOnPlane(landerPos, cam.getZAxis());
 		glm::vec3 delta = mousePos - mouseLastPos;
-	
+
 		landerPos += delta;
 		lander.setPosition(landerPos.x, landerPos.y, landerPos.z);
 		mouseLastPos = mousePos;
@@ -611,7 +611,7 @@ void ofApp::mouseDragged(int x, int y, int button) {
 
 		colBoxList.clear();
 
-		startTime = ofGetElapsedTimeMillis(); 
+		startTime = ofGetElapsedTimeMillis();
 		octree.intersect(bounds, octree.root, colBoxList);
 		endTime = ofGetElapsedTimeMillis() - startTime;
 		//cout << "Time to run octree.intersect: " << ofToString(endTime) << " milliseconds" << endl;
@@ -646,22 +646,22 @@ void ofApp::setCameraTarget() {
 
 
 //--------------------------------------------------------------
-void ofApp::mouseEntered(int x, int y){
+void ofApp::mouseEntered(int x, int y) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseExited(int x, int y){
+void ofApp::mouseExited(int x, int y) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::windowResized(int w, int h){
+void ofApp::windowResized(int w, int h) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::gotMessage(ofMessage msg){
+void ofApp::gotMessage(ofMessage msg) {
 
 }
 
@@ -678,7 +678,7 @@ void ofApp::initLightingAndMaterials() {
 	{ 1.0f, 1.0f, 1.0f, 1.0f };
 
 	static float position[] =
-	{5.0, 5.0, 5.0, 0.0 };
+	{ 5.0, 5.0, 5.0, 0.0 };
 
 	static float lmodel_ambient[] =
 	{ 1.0f, 1.0f, 1.0f, 1.0f };
@@ -701,9 +701,9 @@ void ofApp::initLightingAndMaterials() {
 
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
-//	glEnable(GL_LIGHT1);
+	//	glEnable(GL_LIGHT1);
 	glShadeModel(GL_SMOOTH);
-} 
+}
 
 void ofApp::savePicture() {
 	ofImage picture;
@@ -723,8 +723,8 @@ void ofApp::dragEvent2(ofDragInfo dragInfo) {
 	mouseIntersectPlane(ofVec3f(0, 0, 0), cam.getZAxis(), point);
 	if (lander.loadModel(dragInfo.files[0])) {
 		lander.setScaleNormalization(false);
-//		lander.setScale(.1, .1, .1);
-	//	lander.setPosition(point.x, point.y, point.z);
+		//		lander.setScale(.1, .1, .1);
+			//	lander.setPosition(point.x, point.y, point.z);
 		lander.setPosition(1, 1, 0);
 
 		bLanderLoaded = true;
@@ -737,7 +737,7 @@ void ofApp::dragEvent2(ofDragInfo dragInfo) {
 	else cout << "Error: Can't load model" << dragInfo.files[0] << endl;
 }
 
-bool ofApp::mouseIntersectPlane(ofVec3f planePoint, ofVec3f planeNorm, ofVec3f &point) {
+bool ofApp::mouseIntersectPlane(ofVec3f planePoint, ofVec3f planeNorm, ofVec3f& point) {
 	ofVec2f mouse(mouseX, mouseY);
 	ofVec3f rayPoint = cam.screenToWorld(glm::vec3(mouseX, mouseY, 0));
 	ofVec3f rayDir = rayPoint - cam.getPosition();
@@ -838,6 +838,6 @@ glm::vec3 ofApp::getMousePointOnPlane(glm::vec3 planePt, glm::vec3 planeNorm) {
 //	- turn off collisions? (TODO:)
 //	- move camera to any angle (TODO:)
 //	- ??? (More?)
-void ofApp::devMode(){ 
+void ofApp::devMode() {
 
 }

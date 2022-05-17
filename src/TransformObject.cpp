@@ -9,6 +9,6 @@ TransformObject::TransformObject() {
 	rotation = 0;
 }
 
-void TransformObject::setPosition(const ofVec3f & pos) {
+void TransformObject::setPosition(const ofVec3f& pos) {
 	position = pos;
 }

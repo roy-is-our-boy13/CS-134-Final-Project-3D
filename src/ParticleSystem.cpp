@@ -3,11 +3,11 @@
 
 #include "ParticleSystem.h"
 
-void ParticleSystem::add(const Particle &p) {
+void ParticleSystem::add(const Particle& p) {
 	particles.push_back(p);
 }
 
-void ParticleSystem::addForce(ParticleForce *f) {
+void ParticleSystem::addForce(ParticleForce* f) {
 	forces.push_back(f);
 }
 
@@ -27,10 +27,6 @@ void ParticleSystem::reset() {
 	}
 }
 
-void ParticleSystem::movement(const ofVec3f t, Particle* particle) { //supposed to be used to apply thrust forces to the lander
-	particle->forces = t;
-}
-
 void ParticleSystem::update() {
 	// check if empty and just return
 	if (particles.size() == 0) return;
@@ -43,13 +39,9 @@ void ParticleSystem::update() {
 	// traversing at the same time, we need to use an iterator.
 	//
 	while (p != particles.end()) {
-		
-		if (!unlimitedLife){
-			if (p->lifespan != -1 && p->age() > p->lifespan) {
-				tmp = particles.erase(p);
-				p = tmp;
-			}
-			else p++; 
+		if (p->lifespan != -1 && p->age() > p->lifespan) {
+			tmp = particles.erase(p);
+			p = tmp;
 		}
 		else p++;
 	}
@@ -59,18 +51,17 @@ void ParticleSystem::update() {
 	for (int i = 0; i < particles.size(); i++) {
 		for (int k = 0; k < forces.size(); k++) {
 			if (!forces[k]->applied)
-				forces[k]->updateForce( &particles[i] );
-				//forces.erase(forces.begin()+k); //deletes forces as they are applied 
+				forces[k]->updateForce(&particles[i]);
 		}
 	}
 
-	//// update all forces only applied once to "applied"
-	//// so they are not applied again.
-	////
-	//for (int i = 0; i < forces.size(); i++) {
-	//	if (forces[i]->applyOnce)
-	//		forces[i]->applied = true;
-	//}
+	// update all forces only applied once to "applied"
+	// so they are not applied again.
+	//
+	for (int i = 0; i < forces.size(); i++) {
+		if (forces[i]->applyOnce)
+			forces[i]->applied = true;
+	}
 
 	// integrate all the particles in the store
 	//
@@ -81,7 +72,7 @@ void ParticleSystem::update() {
 
 // remove all particlies within "dist" of point (not implemented as yet)
 //
-int ParticleSystem::removeNear(const ofVec3f & point, float dist) { return 0; }
+int ParticleSystem::removeNear(const ofVec3f& point, float dist) { return 0; }
 
 //  draw the particle cloud
 //
@@ -94,11 +85,11 @@ void ParticleSystem::draw() {
 
 // Gravity Force Field 
 //
-GravityForce::GravityForce(const ofVec3f &g) {
+GravityForce::GravityForce(const ofVec3f& g) {
 	gravity = g;
 }
 
-void GravityForce::updateForce(Particle * particle) {
+void GravityForce::updateForce(Particle* particle) {
 	//
 	// f = mg
 	//
@@ -107,12 +98,12 @@ void GravityForce::updateForce(Particle * particle) {
 
 // Turbulence Force Field 
 //
-TurbulenceForce::TurbulenceForce(const ofVec3f &min, const ofVec3f &max) {
+TurbulenceForce::TurbulenceForce(const ofVec3f& min, const ofVec3f& max) {
 	tmin = min;
 	tmax = max;
 }
 
-void TurbulenceForce::updateForce(Particle * particle) {
+void TurbulenceForce::updateForce(Particle* particle) {
 	//
 	// We are going to add a little "noise" to a particles
 	// forces to achieve a more natual look to the motion
@@ -130,12 +121,12 @@ ImpulseRadialForce::ImpulseRadialForce(float magnitude) {
 	applyOnce = true;
 }
 
-void ImpulseRadialForce::updateForce(Particle * particle) {
+void ImpulseRadialForce::updateForce(Particle* particle) {
 
 	// we basically create a random direction for each particle
 	// the force is only added once after it is triggered.
 	//
-	ofVec3f dir = ofVec3f(ofRandom(-1, 1), ofRandom(-height/2.0, height/2.0), ofRandom(-1, 1));
+	ofVec3f dir = ofVec3f(ofRandom(-1, 1), ofRandom(-height / 2.0, height / 2.0), ofRandom(-1, 1));
 	particle->forces += dir.getNormalized() * magnitude;
 }
 
@@ -143,15 +134,10 @@ CyclicForce::CyclicForce(float magnitude) {
 	this->magnitude = magnitude;
 }
 
-void CyclicForce::updateForce(Particle * particle) {
+void CyclicForce::updateForce(Particle* particle) {
 
 	ofVec3f position = particle->position;
 	ofVec3f norm = position.getNormalized();
 	ofVec3f dir = norm.cross(ofVec3f(0, 1, 0));
 	particle->forces += dir.getNormalized() * magnitude;
-}
-
-void ThrusterForce::updateForce(Particle * particle) {
-	//particle->forces = thrust;
-	particle->forces += thrust;
 }
