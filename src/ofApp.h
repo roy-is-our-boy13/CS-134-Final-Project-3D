@@ -48,6 +48,7 @@ class ofApp : public ofBaseApp{
 		glm::vec3 getMousePointOnPlane(glm::vec3 p , glm::vec3 n);
 		void devMode(); 
 		void fuelDraw(); 
+		void landerMovement(ofVec3f m); 
 
 		//for fuel 
 		float startTime; // store when we start time timer

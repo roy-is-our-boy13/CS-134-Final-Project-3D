@@ -21,8 +21,8 @@
 void ofApp::setup(){
 	bTimerReached = false;
     startTime = ofGetElapsedTimeMillis();  // get the start time
-    // endTime = 120000 + startTime; // two minutes
-		endTime = 10000 + startTime;
+    endTime = 120000 + startTime; // two minutes
+		// endTime = 10000 + startTime;
 
 	bWireframe = false;
 	bDisplayPoints = false;
@@ -408,37 +408,27 @@ void ofApp::drawAxis(ofVec3f location) {
 
 void ofApp::keyPressed(int key) {
 
-	switch (key) {
+	switch (key) { //TODO: thrust strength might be too strong at the moment, or the gravity is too weak
 	case ' ': //apply up booster
-		if (!timerStarted){
-			// activeStart = ofGetElapsedTimeMillis();
-			// cout << "activeStart: " << activeStart << endl;
-			ofResetElapsedTimeCounter();  
-			timerStarted = true; 
-		}
-		activeStart = ofGetElapsedTimeMillis();
-		// cout << "activeStart: " << activeStart << endl; 
-		lander.applyThrust(ofVec3f( 0, 1*thrustStr, 0)); //too strong?
+		landerMovement(ofVec3f(0, 1*thrustStr, 0)); 
 		//Tell lander to create particles with its thrust emitter
 		//lander needs a new method that handles creating particles.
 		break;
 	case OF_KEY_UP: // forward
 		cout << "forward" << endl; 
-		lander.applyThrust(ofVec3f(0, 0, -1 * thrustStr));
+		landerMovement(ofVec3f(0, 0, -1 * thrustStr)); 
 		break; 
 	case OF_KEY_LEFT: // left
 		cout << "left" << endl;
-		lander.applyThrust(ofVec3f(-1 * thrustStr, 0, 0));
+		landerMovement(ofVec3f(-1 * thrustStr, 0, 0)); 
 		break;
 	case OF_KEY_DOWN: // back
-		//TODO: change to back, it's currently down
 		cout << "back" << endl;
-		//lander.applyThrust(ofVec3f(0, -1*thrustStr, 0));
-		lander.applyThrust(ofVec3f(0, 0, 1 * thrustStr));
+		landerMovement(ofVec3f(0, -1*thrustStr, 0)); 
 		break;
 	case OF_KEY_RIGHT: // right
 		cout << "right" << endl;
-		lander.applyThrust(ofVec3f(1 * thrustStr, 0, 0));
+		landerMovement(ofVec3f(1 * thrustStr, 0, 0)); 
 		break;
 	case 'B':
 	case 'b':
@@ -532,14 +522,9 @@ void ofApp::togglePointsDisplay() {
 void ofApp::keyReleased(int key) {
 
 	switch (key) {
-	case ' ': //apply up booster
-		// activeEnd = ofGetElapsedTimeMillis();
-		// cout << "activeEnd: " << activeEnd << endl; 
-		// // timer += activeEnd - activeStart; 
-		// cout << "timer: " <<  timer << endl; 
-		timerStarted = false; 
-		activeEnd = timer; 
-		// ofResetElapsedTimeCounter(); 
+	case ' ': 
+		timerStarted = false; // we stopped using the thruster
+		activeEnd = timer; // remember the amount of fuel we spent
 		break;
 	case OF_KEY_UP: // forward
 		break; 
@@ -900,16 +885,8 @@ void ofApp::fuelDraw() {
 
 		if (timerStarted){ //currently holding down the thrusters
 			timer = startTime + activeStart + activeEnd; 
-			// If I do this version, it drains way too quickly 
-			// timer += ofGetElapsedTimeMillis() - activeStart; 
+			//if thrusters being applied, see how much is being drained
 		}
-
-		// right now, holding down the spacebar makes it count down correctly, but if you apply the thrusters again after shutting them off, it'll start over
-		// if (timerStarted){ //currently holding down the thrusters
-		// 	timer = ofGetElapsedTimeMillis() - activeStart; 
-		// 	// If I do this version, it drains way too quickly 
-		// 	// timer += ofGetElapsedTimeMillis() - activeStart; 
-		// }
     
     if(timer >= endTime && !bTimerReached) {
         bTimerReached = true;        
@@ -937,16 +914,16 @@ void ofApp::fuelDraw() {
     if(bTimerReached) {
         ofSetColor(255, 255, 255);
         ofDrawBitmapString("Out of fuel!", (ofGetWidth()-100)/2, (ofGetHeight()-50));
+				//TODO: this is the lose condition, need to code the loss
     }
-    
-    // some information about the timer
-    string  info  = "FPS:        "+ofToString(ofGetFrameRate(),0)+"\n";
-            info += "Start Time: "+ofToString(startTime, 1)+"\n";
-            info += "End Time:   "+ofToString(endTime/1000.0, 1)+" seconds\n";
-            info += "Timer:      "+ofToString(timer/1000.0, 1)+" seconds\n";
-            info += "Percentage: "+ofToString(pct*100, 1)+"%\n";
-            info += "\nPress ' ' to get a new random end time\n";
-    // ofSetColor(0);
-		ofSetColor(255, 255, 255);
-    ofDrawBitmapString(info, 20, 20);
+}
+//--------------------------------------------------------------
+//take the movement input dictated by the key pressed, then apply the timer
+void ofApp::landerMovement(ofVec3f m){
+	if (!timerStarted){ // only reset when we're applying thrust for the first time (not repeatedly)
+		ofResetElapsedTimeCounter();  
+		timerStarted = true; 
+	}
+	activeStart = ofGetElapsedTimeMillis(); // see how long we're holding the thrust down
+	lander.applyThrust(m);
 }
