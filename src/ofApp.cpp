@@ -174,7 +174,6 @@ void ofApp::checkCollisions() { //TODO: currently this is off of particle positi
 		//cout << "AFTER ADDITION: " << lander.forces << endl;
 		//cout << "==============================================================================" << endl;
 	}
-  
 	// cout << "lander velocity: " << lander.velocity <<
 	// 	"\nlander.forces: " << lander.forces <<
 	// 	"\nAFTER ADDITION: " << lander.forces <<
@@ -230,7 +229,7 @@ void ofApp::update() {
 //--------------------------------------------------------------
 void ofApp::draw() {
 
-	// ofBackground(ofColor::black);
+	ofBackground(ofColor::black);
 
 	glDepthMask(false);
 	if (!bHide) gui.draw();
@@ -528,12 +527,20 @@ void ofApp::keyReleased(int key) {
 		activeEnd = timer; // remember the amount of fuel we spent
 		break;
 	case OF_KEY_UP: // forward
+		timerStarted = false; // we stopped using the thruster
+		activeEnd = timer; // remember the amount of fuel we spent
 		break; 
 	case OF_KEY_LEFT: // left
+		timerStarted = false; // we stopped using the thruster
+		activeEnd = timer; // remember the amount of fuel we spent
 		break;
 	case OF_KEY_DOWN: // back
+		timerStarted = false; // we stopped using the thruster
+		activeEnd = timer; // remember the amount of fuel we spent
 		break;
 	case OF_KEY_RIGHT: // right
+		timerStarted = false; // we stopped using the thruster
+		activeEnd = timer; // remember the amount of fuel we spent
 		break;
 	case OF_KEY_ALT:
 		cam.disableMouseInput();

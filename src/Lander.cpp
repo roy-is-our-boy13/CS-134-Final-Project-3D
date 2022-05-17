@@ -21,7 +21,6 @@ void Lander::integrate()
 	//
 	ofVec3f accel = acceleration;    // start with any acceleration already on the Lander
 	accel += (forces * (1.0 / mass));
-
 	// cout << "force on lander: " << forces << endl;
 	velocity += accel * dt;
 
