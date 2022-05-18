@@ -156,4 +156,9 @@ class ofApp : public ofBaseApp{
 		ofVbo vbo;
 		ofShader shader;
 
+		ofSoundPlayer   boosterSound;
+		ofSoundPlayer   explosionSound;
+
+		ofImage background;
+
 };

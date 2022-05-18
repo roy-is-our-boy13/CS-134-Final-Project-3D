@@ -49,6 +49,9 @@ void ofApp::setup(){
 	cam2.setGlobalPosition(glm::vec3(0, 150, 0));
 	cam2.lookAt(glm::vec3(0, 0, 0));
 
+	boosterSound.load("sounds/booster.mp3");
+	explosionSound.load("sounds/explosion.mp3");
+
 	// texture loading
 	//
 	ofDisableArbTex();     // disable rectangular textures
@@ -60,6 +63,8 @@ void ofApp::setup(){
 		ofExit();
 	}
 
+	background.load("images/background.jpg");
+
 	// load the shader
 	//
 	#ifdef TARGET_OPENGLES
@@ -67,7 +72,6 @@ void ofApp::setup(){
 	#else
 		shader.load("shaders/shader");
 	#endif
-
 
 	// setup rudimentary lighting 
 	//
@@ -137,12 +141,12 @@ void ofApp::setup(){
 	//Lander Thrust Particles Setup.
 	lander.thrustEmitter.init();
 	lander.thrustEmitter.setLifespan(1);
-	lander.thrustEmitter.setRate(100);
+	lander.thrustEmitter.setRate(50);
 	lander.thrustEmitter.setVelocity(glm::vec3(0, -1, 0));
 	lander.thrustEmitter.setParticleRadius(radius);
 
 	//added by lauren, reference from radialEmitterExample
-	lander.thrustEmitter.setGroupSize(20);
+	lander.thrustEmitter.setGroupSize(10);
 	//lander.thrustEmitter.setOneShot(true);
 	//lander.thrustEmitter.setRandomLife(true);
 	//lander.thrustEmitter.setLifespanRange(ofVec2f(1, 2));
@@ -341,15 +345,31 @@ void ofApp::update()
 }
 //--------------------------------------------------------------
 void ofApp::draw() {
+	ofSetColor(ofColor::white); 
+	background.draw(0, 0);
 
-	ofBackground(ofColor::black);
+	//ofBackground(ofColor::black);
 
 	glDepthMask(false);
+
+	// this makes everything look glowy :)
+	//
+	ofEnableBlendMode(OF_BLENDMODE_ADD);
+	ofEnablePointSprites();
+
 	if (!bHide) gui.draw();
 	glDepthMask(true);
 
-	// cam.begin();
+	 //cam.begin();
 	theCam->begin(); 
+	//shader.begin();
+
+	// draw particle emitter here..
+	//
+	//	emitter.draw();
+	particleTex.bind();
+	vbo.draw(GL_POINTS, 0, (int)lander.thrustEmitter.sys->particles.size());
+	particleTex.unbind();
 
 	ofPushMatrix();
 	if (bWireframe) {                    // wireframe mode  (include axis)
@@ -470,8 +490,13 @@ void ofApp::draw() {
 	cam1.draw();
 	cam2.draw();*/
 
+	//shader.end();
 	theCam->end();
-	// cam.end();
+	 //cam.end();
+
+	ofDisablePointSprites();
+	ofDisableBlendMode();
+	ofEnableAlphaBlending();
 
 	fuelDraw(); //to draw the fuel bar
 
@@ -1050,5 +1075,6 @@ void ofApp::landerMovement(ofVec3f m){
 	}
 	activeStart = ofGetElapsedTimeMillis(); // see how long we're holding the thrust down
 	lander.applyThrust(m);
+	if (!boosterSound.isPlaying()) { boosterSound.play(); }
 }
 //--------------------------------------------------------------
