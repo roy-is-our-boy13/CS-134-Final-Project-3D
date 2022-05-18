@@ -52,6 +52,7 @@ class ofApp : public ofBaseApp{
 		void fuelDraw(); 
 		void landerMovement(ofVec3f m);
 		void cameraSetup(); 
+		void updateCameras(); 
 
 		//for fuel 
 		float startTime; // store when we start time timer

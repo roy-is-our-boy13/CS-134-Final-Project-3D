@@ -109,12 +109,7 @@ void ofApp::setup(){
 	//  Create Octree for testing.
 	//
 	
-	// startTime = ofGetElapsedTimeMillis(); 
 	octree.create(lunar.getMesh(0), 20);
-	// endTime = ofGetElapsedTimeMillis() - startTime;
-	//cout << "Time to run Octree:: create: " << ofToString(endTime) << " milliseconds" << endl;
-	
-	//cout << "Number of Verts: " << mars.getMesh(0).getNumVertices() << endl;
 
 	testBox = Box(Vector3(3, 3, 0), Vector3(5, 5, 2));
 
@@ -145,15 +140,9 @@ void ofApp::setup(){
 
 	//added by lauren, reference from radialEmitterExample
 	lander.thrustEmitter.setGroupSize(10);
-	//lander.thrustEmitter.setOneShot(true);
-	//lander.thrustEmitter.setRandomLife(true);
-	//lander.thrustEmitter.setLifespanRange(ofVec2f(1, 2));
-
 	//adding forces for booster particles 
 	lander.thrustEmitter.sys->addForce(new TurbulenceForce(ofVec3f(-5, -5, -5), ofVec3f(5, 5, 5)));
 	lander.thrustEmitter.sys->addForce(new GravityForce(ofVec3f(0, -gravity, 0))); 
-	/*lander.thrustEmitter.sys->addForce(new ImpulseRadialForce(1000));
-	lander.thrustEmitter.sys->addForce(new CyclicForce(0));*/
 
 	//explosion 
 	emitter.sys->addForce(new TurbulenceForce(ofVec3f(-5, -5, -5), ofVec3f(5, 5, 5)));
@@ -391,17 +380,7 @@ void ofApp::draw() {
 
 	glDepthMask(true);
 
-	//switch (camToView) {
-	//	case 0: 
-	//		cam.begin(); 
-	//	case 1: 
-	//		cam1.begin(); 
-	//	case 2: 
-	//		cam2.begin(); 
-	//}
-	 //cam2.begin();
 	 theCam->begin(); 
-	//camArray[camToView].begin();
 	//shader.begin();
 
 	// draw particle emitter here..
@@ -533,17 +512,6 @@ void ofApp::draw() {
 
 	//shader.end();
 	 theCam->end();
-	//cam2.end();
-	//camArray[camToView].end();
-
-	//switch (camToView) {
-	//case 0:
-	//	cam.end();
-	//case 1:
-	//	cam1.end();
-	//case 2:
-	//	cam2.end();
-	//}
 
 	ofDisablePointSprites();
 	ofDisableBlendMode();
@@ -683,17 +651,14 @@ void ofApp::keyPressed(int key) {
 	case OF_KEY_DEL:
 		break;
 	case OF_KEY_F1:
-		//camToView = 0;
 		cout << "camToView: 0" << endl; 
 		 theCam = &cam;
 		break;
 	case OF_KEY_F2:
-		//camToView = 1;
 		cout << "camToView: 1" << endl;
 		 theCam = &cam1;
 		break;
 	case OF_KEY_F3:
-		//camToView = 2; 
 		cout << "camToView: 2" << endl;
 		 theCam = &cam2;
 		break;
@@ -1145,23 +1110,44 @@ void ofApp::cameraSetup() {
 	camToView = 0; //which camera do we begin by looking at? 
 	// camToConfigure = 1; //this is the camera that's following
 
-	//TODO: reference 'cam' instead of 'theCam', because 'theCam' is just a pointer
+	//reference 'cam' instead of 'theCam', because 'theCam' is just a pointer
 
 	for(int i=0; i<3; i++) {
 		cout << "camArray: " << i << endl; 
 		camArray[i].resetTransform();
-		camArray[i].setFov(60);
+		camArray[i].setFov(65.5); //TODO: might change this
 		camArray[i].clearParent();
 	}
-	
-	// cam[0].setPosition(40, 40, 190);
-	// doMouseOrbit[0] = true;
-	// theCam->setPosition(40, 40, 190);
-	cam.setPosition(40, 40, 190);
-	//cam.setPosition(1000, 1000, 1000);
-	
-	cam1.setPosition(80, 40, 30);
-	// cam1.lookAt(lander.position); 
+
+	//TODO: reference for how to set the cameras. 
+	// setGlobalPosition shows where the camera is viewing from, while lookAt is the direction
+	//cam1.setGlobalPosition(glm::vec3(100, 0, 0));
+	//cam1.lookAt(glm::vec3(0, 0, 0));
+
+	//cam2.setGlobalPosition(glm::vec3(0, 150, 0));
+	//cam2.lookAt(glm::vec3(0, 0, 0));
+
+	//Top-down position
+	//cam1.setGlobalPosition(glm::vec3(0, 150, 0));
+	//cam1.lookAt(glm::vec3(0, 0, 0));
+
+	//cam2.setPosition(80, 40, 30);
 	// lookatIndex[1] = kNumTestNodes-1; // look at smallest node
+
+	//TODO: REQUIREMENTS: 
+	// 1. easyCam that people can drag around, should be "cam" 
+	cam.setPosition(40, 40, 190);
+
+	// 2. One "tracking" cam that stays aimed at the spacecraft from a fixed location 
+	cam1.setGlobalPosition(glm::vec3(50, 50, 50));
+	cam1.lookAt(glm::vec3(0, 0, 0));
+
+	// 3. One onboard, developer chooses what direction the camera is pointing
 	cam2.setPosition(80, 40, 30);
+
+}
+//--------------------------------------------------------------
+// update things for the camera like the position, direction, etc
+void ofApp::updateCameras() {
+
 }
