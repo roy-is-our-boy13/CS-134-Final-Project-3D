@@ -6,7 +6,6 @@
 #include "Octree.h"
 #include <glm/gtx/intersect.hpp>
 
-
 //** Particle system and gravity start **//
 #include "Particle.h"
 #include "ParticleEmitter.h"
@@ -52,6 +51,7 @@ class ofApp : public ofBaseApp{
 		void devMode(); 
 		void fuelDraw(); 
 		void landerMovement(ofVec3f m);
+		void cameraSetup(); 
 
 		//for fuel 
 		float startTime; // store when we start time timer
@@ -63,9 +63,13 @@ class ofApp : public ofBaseApp{
 		
 		bool  bTimerReached; // used as a trigger when we hit the timer
 
+
+		//** Cameras **//
 		ofEasyCam cam; // this is the main camera
 		ofCamera cam1, cam2; // these are the other camera views
-		ofCamera* theCam;
+		ofCamera* theCam; // note that "theCam" is also easyCam so we can put it in the array
+		int camToView; // which camera index are we looking through
+		ofCamera camArray[3] = {cam, cam1, cam2}; //cam is a different kind of camera but seems to work in this array
 
 		//ofxAssimpModelLoader mars, lander;
 		ofxAssimpModelLoader lunar, model; 

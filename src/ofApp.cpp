@@ -28,10 +28,6 @@ void ofApp::setup(){
 	bCtrlKeyDown = false;
 	bLanderLoaded = false;
 	bTerrainSelected = true;
-//	ofSetWindowShape(1024, 768);
-// 
-	//TODO: What do we want the intial camera distance to be?
-	cam.setDistance(75);
 
 	//TODO: this has a weird reaction to having the different cameras
 	//cam.setNearClip(.1);
@@ -40,14 +36,16 @@ void ofApp::setup(){
 	cam.disableMouseInput();
 	ofEnableSmoothing();
 	ofEnableDepthTest();
+	ofEnableLighting();
 
 	theCam = &cam; // referencing the main camera
+	cameraSetup(); 
 
-	cam1.setGlobalPosition(glm::vec3(100, 0, 0));
-	cam1.lookAt(glm::vec3(0, 0, 0));
+	// cam1.setGlobalPosition(glm::vec3(100, 0, 0));
+	// cam1.lookAt(glm::vec3(0, 0, 0));
 
-	cam2.setGlobalPosition(glm::vec3(0, 150, 0));
-	cam2.lookAt(glm::vec3(0, 0, 0));
+	// cam2.setGlobalPosition(glm::vec3(0, 150, 0));
+	// cam2.lookAt(glm::vec3(0, 0, 0));
 
 	boosterSound.load("sounds/booster.mp3");
 	explosionSound.load("sounds/explosion.mp3");
@@ -166,14 +164,6 @@ void ofApp::setup(){
 	//emitter.setGroupSize(100);
 	//emitter.setLifespan(1);
 
-	cam.setDistance(10);
-	cam.setNearClip(.1);
-	cam.setFov(65.5);   // approx equivalent to 28mm in 35mm format
-//	ofSetVerticalSync(true);
-	cam.disableMouseInput();
-	ofEnableDepthTest();
-	ofEnableLighting();
-
 	// Setup 3 - Light System
 	// 
 	/*
@@ -270,11 +260,6 @@ void ofApp::loadVbo2() {
 //--------------------------------------------------------------
 //
 //	FROM: examples/particleBouncingBall, written by prof. smith
-//  This a very simple function to check for collision on the ground plane at (0,0,0)
-//  If the partical position.y value is smaller than it's radius, we will assume
-//  it's has gone through the plane and we apply a simple impulse function
-//  resolve it..
-//
 void ofApp::checkCollisions() { //TODO: currently this is off of particle position. We need to change it to OCTREE collisions
 
 	//Collision Detection(final proj)
@@ -395,7 +380,7 @@ void ofApp::draw() {
 	ofSetColor(ofColor::white); 
 	background.draw(0, 0);
 
-	//ofBackground(ofColor::black);
+	if (!bHide) gui.draw(); //keep this near the top of draw(), or it will not show correctly 
 
 	glDepthMask(false);
 
@@ -404,11 +389,19 @@ void ofApp::draw() {
 	ofEnableBlendMode(OF_BLENDMODE_ADD);
 	ofEnablePointSprites();
 
-	if (!bHide) gui.draw();
 	glDepthMask(true);
 
-	 //cam.begin();
-	theCam->begin(); 
+	//switch (camToView) {
+	//	case 0: 
+	//		cam.begin(); 
+	//	case 1: 
+	//		cam1.begin(); 
+	//	case 2: 
+	//		cam2.begin(); 
+	//}
+	 //cam2.begin();
+	 theCam->begin(); 
+	//camArray[camToView].begin();
 	//shader.begin();
 
 	// draw particle emitter here..
@@ -539,8 +532,18 @@ void ofApp::draw() {
 	cam2.draw();*/
 
 	//shader.end();
-	theCam->end();
-	 //cam.end();
+	 theCam->end();
+	//cam2.end();
+	//camArray[camToView].end();
+
+	//switch (camToView) {
+	//case 0:
+	//	cam.end();
+	//case 1:
+	//	cam1.end();
+	//case 2:
+	//	cam2.end();
+	//}
 
 	ofDisablePointSprites();
 	ofDisableBlendMode();
@@ -680,13 +683,19 @@ void ofApp::keyPressed(int key) {
 	case OF_KEY_DEL:
 		break;
 	case OF_KEY_F1:
-		theCam = &cam;
+		//camToView = 0;
+		cout << "camToView: 0" << endl; 
+		 theCam = &cam;
 		break;
 	case OF_KEY_F2:
-		theCam = &cam1;
+		//camToView = 1;
+		cout << "camToView: 1" << endl;
+		 theCam = &cam1;
 		break;
 	case OF_KEY_F3:
-		theCam = &cam2;
+		//camToView = 2; 
+		cout << "camToView: 2" << endl;
+		 theCam = &cam2;
 		break;
 	case OF_KEY_SHIFT:				// release a particle
 		//landerParticle.start(); //TODO: How do we use this to relaunch the same particle more than once?
@@ -1131,3 +1140,28 @@ void ofApp::landerMovement(ofVec3f m){
 	if (!boosterSound.isPlaying()) { boosterSound.play(); }
 }
 //--------------------------------------------------------------
+// sets up the camera and works as a return state if we need to 'reset' the camera
+void ofApp::cameraSetup() { 
+	camToView = 0; //which camera do we begin by looking at? 
+	// camToConfigure = 1; //this is the camera that's following
+
+	//TODO: reference 'cam' instead of 'theCam', because 'theCam' is just a pointer
+
+	for(int i=0; i<3; i++) {
+		cout << "camArray: " << i << endl; 
+		camArray[i].resetTransform();
+		camArray[i].setFov(60);
+		camArray[i].clearParent();
+	}
+	
+	// cam[0].setPosition(40, 40, 190);
+	// doMouseOrbit[0] = true;
+	// theCam->setPosition(40, 40, 190);
+	cam.setPosition(40, 40, 190);
+	//cam.setPosition(1000, 1000, 1000);
+	
+	cam1.setPosition(80, 40, 30);
+	// cam1.lookAt(lander.position); 
+	// lookatIndex[1] = kNumTestNodes-1; // look at smallest node
+	cam2.setPosition(80, 40, 30);
+}
