@@ -49,7 +49,7 @@ class ofApp : public ofBaseApp{
 		void loadVbo();
 		void devMode(); 
 		void fuelDraw(); 
-		void landerMovement(ofVec3f m); 
+		void landerMovement(ofVec3f m);
 
 		//for fuel 
 		float startTime; // store when we start time timer

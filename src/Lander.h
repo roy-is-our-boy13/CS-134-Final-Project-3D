@@ -29,6 +29,7 @@ public:
 	void	applyThrust(ofVec3f t);
 	void	createParticles();
 	ParticleEmitter thrustEmitter;
+	void	stopParticles(); 
 
 	ofLight light;
 

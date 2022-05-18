@@ -95,7 +95,7 @@ void ofApp::setup(){
 	gui.setup();
 	gui.add(numLevels.setup("Number of Octree Levels", 1, 1, 10));
 	gui.add(velocity.setup("Initial Velocity", ofVec3f(25, 35, 0), ofVec3f(0, 0, 0), ofVec3f(100, 100, 100)));	// high on default, change to thruster?
-	gui.add(thrustStr.setup("Thrust", 10, 10, 100));
+	gui.add(thrustStr.setup("Thrust", 5, 5, 100));
 	gui.add(lifespan.setup("Lifespan", 2.0, .1, 10.0));
 	gui.add(rate.setup("Rate", 1.0, .5, 60.0));
 	gui.add(damping.setup("Damping", .99, .1, 1.0));
@@ -148,7 +148,7 @@ void ofApp::setup(){
 	//lander.thrustEmitter.setLifespanRange(ofVec2f(1, 2));
 
 	//adding forces for booster particles 
-	lander.thrustEmitter.sys->addForce(new TurbulenceForce(ofVec3f(-5, -20, -5), ofVec3f(5, 20, 5)));
+	lander.thrustEmitter.sys->addForce(new TurbulenceForce(ofVec3f(-5, -5, -5), ofVec3f(5, 5, 5)));
 	lander.thrustEmitter.sys->addForce(new GravityForce(ofVec3f(0, -gravity, 0))); 
 	/*lander.thrustEmitter.sys->addForce(new ImpulseRadialForce(1000));
 	lander.thrustEmitter.sys->addForce(new CyclicForce(0));*/
@@ -638,6 +638,7 @@ void ofApp::keyReleased(int key) {
 
 	switch (key) {
 	case ' ': 
+		lander.stopParticles();
 		timerStarted = false; // we stopped using the thruster
 		activeEnd = timer; // remember the amount of fuel we spent
 		break;
@@ -1050,3 +1051,4 @@ void ofApp::landerMovement(ofVec3f m){
 	activeStart = ofGetElapsedTimeMillis(); // see how long we're holding the thrust down
 	lander.applyThrust(m);
 }
+//--------------------------------------------------------------

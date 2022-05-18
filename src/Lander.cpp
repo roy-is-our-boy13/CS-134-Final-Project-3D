@@ -64,5 +64,12 @@ void Lander::applyThrust(ofVec3f t) {
 
 void Lander::createParticles() 
 {
+	//thrustEmitter.sys->reset(); 
 	thrustEmitter.start();
+}
+
+void Lander::stopParticles()
+{
+	thrustEmitter.sys->reset();
+	thrustEmitter.stop();
 }
