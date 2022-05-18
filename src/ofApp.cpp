@@ -13,8 +13,6 @@
 #include "ofApp.h"
 #include "Util.h"
 
-
-
 //--------------------------------------------------------------
 // setup scene, lighting, state and load geometry
 //
@@ -78,12 +76,12 @@ void ofApp::setup(){
 	gui.setup();
 	gui.add(numLevels.setup("Number of Octree Levels", 1, 1, 10));
 	gui.add(velocity.setup("Initial Velocity", ofVec3f(25, 35, 0), ofVec3f(0, 0, 0), ofVec3f(100, 100, 100)));	// high on default, change to thruster?
-	gui.add(thrustStr.setup("Thrust", 5, 10, 100));
+	gui.add(thrustStr.setup("Thrust", 10, 10, 100));
 	gui.add(lifespan.setup("Lifespan", 2.0, .1, 10.0));
 	gui.add(rate.setup("Rate", 1.0, .5, 60.0));
 	gui.add(damping.setup("Damping", .99, .1, 1.0));
     gui.add(gravity.setup("Gravity", 0, 0, 20));
-	gui.add(radius.setup("Radius", .1, .01, 1.0));
+	gui.add(radius.setup("Radius", .01, .01, 1.0));
 	gui.add(restitution.setup("Restitution", .85, 0, 1.0));
 	bHide = false;
 
@@ -119,10 +117,22 @@ void ofApp::setup(){
 	
 	//Lander Thrust Particles Setup.
 	lander.thrustEmitter.init();
-	lander.thrustEmitter.setLifespan(3);
-	lander.thrustEmitter.setRate(10);
+	lander.thrustEmitter.setLifespan(1);
+	lander.thrustEmitter.setRate(100);
 	lander.thrustEmitter.setVelocity(glm::vec3(0, -1, 0));
 	lander.thrustEmitter.setParticleRadius(radius);
+
+	//added by lauren, reference from radialEmitterExample
+	lander.thrustEmitter.setGroupSize(20);
+	//lander.thrustEmitter.setOneShot(true);
+	//lander.thrustEmitter.setRandomLife(true);
+	//lander.thrustEmitter.setLifespanRange(ofVec2f(1, 2));
+
+	//adding forces for booster particles 
+	lander.thrustEmitter.sys->addForce(new TurbulenceForce(ofVec3f(-5, -20, -5), ofVec3f(5, 20, 5)));
+	lander.thrustEmitter.sys->addForce(new GravityForce(ofVec3f(0, -gravity, 0))); 
+	/*lander.thrustEmitter.sys->addForce(new ImpulseRadialForce(1000));
+	lander.thrustEmitter.sys->addForce(new CyclicForce(0));*/
 
 	cam.setDistance(10);
 	cam.setNearClip(.1);

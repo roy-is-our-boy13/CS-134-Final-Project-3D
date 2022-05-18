@@ -125,7 +125,7 @@ class ofApp : public ofBaseApp{
 		ParticleSystem* sys;
 
 
-		ofLight keyLight, fillLight, rimLight, light;
+		//ofLight keyLight, fillLight, rimLight, light;
 		ofPlanePrimitive plane;
 		ofMaterial planeMaterial;
 
@@ -133,7 +133,9 @@ class ofApp : public ofBaseApp{
 		bool bModelLoaded = false;
 		bool bPlaneLoaded = false;
 		bool bWireFrame = false;
-		ofxPanel gui;
+		
+		//ofxPanel gui;
+		
 		ofxToggle keyEnabled, fillEnabled, rimEnabled;
 
 		ofxVec3Slider keyPosition, keyDiffuse, keySpecular;

@@ -3,6 +3,7 @@
 #include  "ofxAssimpModelLoader.h"
 #include "ofMain.h"
 #include "ParticleEmitter.h"
+#include "ofxGui.h"
 
 // This extends ofxAssimpModelLoader, so it should have all of the same methods to start
 // this makes the implementation much easier (nothing to change in ofApp.cpp)
@@ -38,7 +39,8 @@ public:
 	bool bModelLoaded = false;
 	bool bPlaneLoaded = false;
 	bool bWireFrame = false;
-	ofxPanel gui;
+	//ofxPanel gui;
+
 	ofxToggle keyEnabled, fillEnabled, rimEnabled;
 
 	ofxVec3Slider keyPosition, keyDiffuse, keySpecular;

@@ -1,7 +1,7 @@
 #include "Lander.h"
-#include "ofApp.h"
-#include  "ofxAssimpModelLoader.h"
-#include "ofApp.cpp"
+//#include "ofApp.h"
+//#include  "ofxAssimpModelLoader.h"
+//#include "ofApp.cpp"
 
 
 // This is the actual integrator 
@@ -36,7 +36,7 @@ void Lander::integrate()
 	//forces.set(0, 0, 0);
 	forces.set(gravity.x, gravity.y, gravity.z); //	We always have gravity, so reset it by reapplying the gravity?
 	thrustEmitter.setPosition(position);
-	light.setPosition(postion); 
+	light.setPosition(position); 
 }
 
 //void Lander::setPosition(float x, float y, float z) {
