@@ -70,7 +70,7 @@ void ofApp::setup(){
 	#ifdef TARGET_OPENGLES
 		shader.load("shaders_gles/shader");
 	#else
-		shader.load("shaders/shader");
+		shader.load("shaders/shader.frag");
 	#endif
 
 	// setup rudimentary lighting 
@@ -112,7 +112,7 @@ void ofApp::setup(){
 	//
 	
 	// startTime = ofGetElapsedTimeMillis(); 
-	octree.create(lunar.getMesh(0), 20);
+	octree.create(lunar.getMesh(0), 10);
 	// endTime = ofGetElapsedTimeMillis() - startTime;
 	//cout << "Time to run Octree:: create: " << ofToString(endTime) << " milliseconds" << endl;
 	
@@ -158,13 +158,14 @@ void ofApp::setup(){
 	lander.thrustEmitter.sys->addForce(new CyclicForce(0));*/
 
 	//explosion 
-	emitter.sys->addForce(new TurbulenceForce(ofVec3f(-5, -5, -5), ofVec3f(5, 5, 5)));
-	emitter.sys->addForce(new GravityForce(ofVec3f(0, -gravity, 0)));
-	emitter.sys->addForce(new ImpulseRadialForce(1000));
-	emitter.sys->addForce(new CyclicForce(0));
-	emitter.setEmitterType(RadialEmitter);
-	//emitter.setGroupSize(100);
-	//emitter.setLifespan(1);
+	lander.explodeEmitter.sys->addForce(new TurbulenceForce(ofVec3f(-5, -5, -5), ofVec3f(5, 5, 5)));
+	lander.explodeEmitter.sys->addForce(new GravityForce(ofVec3f(0, -gravity, 0)));
+	lander.explodeEmitter.sys->addForce(new ImpulseRadialForce(1000));
+	lander.explodeEmitter.sys->addForce(new CyclicForce(0));
+	lander.explodeEmitter.setEmitterType(RadialEmitter);
+	lander.explodeEmitter.setOneShot(true);
+	lander.explodeEmitter.setGroupSize(100);
+	//lander.explodeEmitter.setLifespan(1);
 
 	cam.setDistance(10);
 	cam.setNearClip(.1);
@@ -252,12 +253,12 @@ void ofApp::loadVbo() {
 }
 
 void ofApp::loadVbo2() {
-	if (emitter.sys->particles.size() < 1) return;
+	if (lander.explodeEmitter.sys->particles.size() < 1) return;
 
 	vector<ofVec3f> sizes;
 	vector<ofVec3f> points;
-	for (int i = 0; i < emitter.sys->particles.size(); i++) {
-		points.push_back(emitter.sys->particles[i].position);
+	for (int i = 0; i < lander.explodeEmitter.sys->particles.size(); i++) {
+		points.push_back(lander.explodeEmitter.sys->particles[i].position);
 		sizes.push_back(ofVec3f(radius));
 	}
 	// upload the data to the vbo
@@ -311,6 +312,15 @@ void ofApp::checkCollisions() { //TODO: currently this is off of particle positi
 		ofVec3f vel = lander.velocity; //access the velocity of the lander for the restitution bounce
 		//cout << "lander velocity: " << vel << endl;
 
+		// crashVelocity is a float that we can set in the gui
+		if (vel.length() > 1) 
+		{
+			lander.explodeEmitter.start();
+		}
+		// tell lander to explode
+		// lander uses a explode function to set off particles explosion and delete itself
+		// might need to do other things like a game over screen or set a boolean flag to stop input from affecting the now noneexisitant lander
+		
 		// apply impulse function
 		//
 		ofVec3f norm = ofVec3f(0, 1, 0);  // TODO: this should be normalizing the mesh/vertices(?)
@@ -384,6 +394,7 @@ void ofApp::update()
 	//}
 
 	lander.thrustEmitter.update();
+	lander.explodeEmitter.update();
 }
 //--------------------------------------------------------------
 void ofApp::draw() {
@@ -414,9 +425,9 @@ void ofApp::draw() {
 	// draw particle emitter here..
 	//
 	particleTex.bind();
-	//emitter.draw();
+	//lander.explodeEmitter.draw();
 	vbo.draw(GL_POINTS, 0, (int)lander.thrustEmitter.sys->particles.size());
-	vbo2.draw(GL_POINTS, 0, (int)emitter.sys->particles.size()); //add vbo for explosion, then add this
+	vbo2.draw(GL_POINTS, 0, (int)lander.explodeEmitter.sys->particles.size()); //add vbo for explosion, then add this
 	particleTex.unbind();
 
 	ofPushMatrix();
@@ -481,6 +492,7 @@ void ofApp::draw() {
 				}
 			}
 			lander.thrustEmitter.draw();
+			lander.explodeEmitter.draw();
 		}
 	}
 	if (bTerrainSelected) drawAxis(ofVec3f(0, 0, 0));
@@ -629,8 +641,8 @@ void ofApp::keyPressed(int key) {
 		break;
 	case 'D':
 	case 'e': //explosion
-		//emitter.sys->reset();
-		emitter.start();
+		//lander.explodeEmitter.sys->reset();
+		lander.explodeEmitter.start();
 		cout << "emitter started" << endl; 
 		break;
 	case 'F':
