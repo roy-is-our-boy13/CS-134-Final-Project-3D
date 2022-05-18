@@ -362,7 +362,7 @@ void ofApp::draw() {
 
 	 //cam.begin();
 	theCam->begin(); 
-	//shader.begin();
+	shader.begin();
 
 	// draw particle emitter here..
 	//
@@ -490,7 +490,7 @@ void ofApp::draw() {
 	cam1.draw();
 	cam2.draw();*/
 
-	//shader.end();
+	shader.end();
 	theCam->end();
 	 //cam.end();
 
@@ -1075,6 +1075,5 @@ void ofApp::landerMovement(ofVec3f m){
 	}
 	activeStart = ofGetElapsedTimeMillis(); // see how long we're holding the thrust down
 	lander.applyThrust(m);
-	if (!boosterSound.isPlaying()) { boosterSound.play(); }
 }
 //--------------------------------------------------------------
