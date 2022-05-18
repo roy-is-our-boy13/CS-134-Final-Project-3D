@@ -46,6 +46,7 @@ class ofApp : public ofBaseApp{
 		bool mouseIntersectPlane(ofVec3f planePoint, ofVec3f planeNorm, ofVec3f &point);
 		bool raySelectWithOctree(ofVec3f &pointRet);
 		glm::vec3 getMousePointOnPlane(glm::vec3 p , glm::vec3 n);
+		void loadVbo();
 		void devMode(); 
 		void fuelDraw(); 
 		void landerMovement(ofVec3f m); 
@@ -145,5 +146,14 @@ class ofApp : public ofBaseApp{
 		ofxVec3Slider rimPosition, rimDiffuse, rimSpecular;
 
 		ofxFloatSlider planeShiningess;
+
+		// textures
+		//
+		ofTexture  particleTex;
+
+		// shaders
+		//
+		ofVbo vbo;
+		ofShader shader;
 
 };

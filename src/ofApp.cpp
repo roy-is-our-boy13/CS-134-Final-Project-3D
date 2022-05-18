@@ -49,6 +49,25 @@ void ofApp::setup(){
 	cam2.setGlobalPosition(glm::vec3(0, 150, 0));
 	cam2.lookAt(glm::vec3(0, 0, 0));
 
+	// texture loading
+	//
+	ofDisableArbTex();     // disable rectangular textures
+
+	// load textures
+	//
+	if (!ofLoadImage(particleTex, "images/dot.png")) {
+		cout << "Particle Texture File: images/dot.png not found" << endl;
+		ofExit();
+	}
+
+	// load the shader
+	//
+	#ifdef TARGET_OPENGLES
+		shader.load("shaders_gles/shader");
+	#else
+		shader.load("shaders/shader");
+	#endif
+
 
 	// setup rudimentary lighting 
 	//
@@ -182,7 +201,28 @@ void ofApp::setup(){
 	rimLight.setPosition(0, 5, -7);*/
 
 }
+//--------------------------------------------------------------
+//
+// load vertex buffer in preparation for rendering
+//
+void ofApp::loadVbo() {
+	if (lander.thrustEmitter.sys->particles.size() < 1) return;
 
+	vector<ofVec3f> sizes;
+	vector<ofVec3f> points;
+	for (int i = 0; i < lander.thrustEmitter.sys->particles.size(); i++) {
+		points.push_back(lander.thrustEmitter.sys->particles[i].position);
+		sizes.push_back(ofVec3f(radius));
+	}
+	// upload the data to the vbo
+	//
+	int total = (int)points.size();
+	vbo.clear();
+	vbo.setVertexData(&points[0], total, GL_STATIC_DRAW);
+	vbo.setNormalData(&sizes[0], total, GL_STATIC_DRAW);
+}
+//--------------------------------------------------------------
+//
 //	FROM: examples/particleBouncingBall, written by prof. smith
 //  This a very simple function to check for collision on the ground plane at (0,0,0)
 //  If the partical position.y value is smaller than it's radius, we will assume
