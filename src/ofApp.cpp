@@ -157,6 +157,15 @@ void ofApp::setup(){
 	/*lander.thrustEmitter.sys->addForce(new ImpulseRadialForce(1000));
 	lander.thrustEmitter.sys->addForce(new CyclicForce(0));*/
 
+	//explosion 
+	emitter.sys->addForce(new TurbulenceForce(ofVec3f(-5, -5, -5), ofVec3f(5, 5, 5)));
+	emitter.sys->addForce(new GravityForce(ofVec3f(0, -gravity, 0)));
+	emitter.sys->addForce(new ImpulseRadialForce(1000));
+	emitter.sys->addForce(new CyclicForce(0));
+	emitter.setEmitterType(RadialEmitter);
+	//emitter.setGroupSize(100);
+	//emitter.setLifespan(1);
+
 	cam.setDistance(10);
 	cam.setNearClip(.1);
 	cam.setFov(65.5);   // approx equivalent to 28mm in 35mm format
@@ -209,6 +218,22 @@ void ofApp::setup(){
 //
 // load vertex buffer in preparation for rendering
 //
+//void ofApp::loadVbo(ParticleEmitter e) { //TODO: add something like this for the explosion emitter
+//	if (e.sys->particles.size() < 1) return;
+//
+//	vector<ofVec3f> sizes;
+//	vector<ofVec3f> points;
+//	for (int i = 0; i < e.sys->particles.size(); i++) {
+//		points.push_back(lander.thrustEmitter.sys->particles[i].position);
+//		sizes.push_back(ofVec3f(radius));
+//	}
+//	// upload the data to the vbo
+//	//
+//	int total = (int)points.size();
+//	vbo.clear();
+//	vbo.setVertexData(&points[0], total, GL_STATIC_DRAW);
+//	vbo.setNormalData(&sizes[0], total, GL_STATIC_DRAW);
+//}
 void ofApp::loadVbo() {
 	if (lander.thrustEmitter.sys->particles.size() < 1) return;
 
@@ -224,6 +249,23 @@ void ofApp::loadVbo() {
 	vbo.clear();
 	vbo.setVertexData(&points[0], total, GL_STATIC_DRAW);
 	vbo.setNormalData(&sizes[0], total, GL_STATIC_DRAW);
+}
+
+void ofApp::loadVbo2() {
+	if (emitter.sys->particles.size() < 1) return;
+
+	vector<ofVec3f> sizes;
+	vector<ofVec3f> points;
+	for (int i = 0; i < emitter.sys->particles.size(); i++) {
+		points.push_back(emitter.sys->particles[i].position);
+		sizes.push_back(ofVec3f(radius));
+	}
+	// upload the data to the vbo
+	//
+	int total = (int)points.size();
+	vbo2.clear();
+	vbo2.setVertexData(&points[0], total, GL_STATIC_DRAW);
+	vbo2.setNormalData(&sizes[0], total, GL_STATIC_DRAW);
 }
 //--------------------------------------------------------------
 //
@@ -345,6 +387,11 @@ void ofApp::update()
 }
 //--------------------------------------------------------------
 void ofApp::draw() {
+	loadVbo(); 
+	loadVbo2(); 
+	//loadVbo(lander.thrustEmitter);
+	//loadVbo(emitter);
+
 	ofSetColor(ofColor::white); 
 	background.draw(0, 0);
 
@@ -366,9 +413,10 @@ void ofApp::draw() {
 
 	// draw particle emitter here..
 	//
-	//	emitter.draw();
 	particleTex.bind();
+	//emitter.draw();
 	vbo.draw(GL_POINTS, 0, (int)lander.thrustEmitter.sys->particles.size());
+	vbo2.draw(GL_POINTS, 0, (int)emitter.sys->particles.size()); //add vbo for explosion, then add this
 	particleTex.unbind();
 
 	ofPushMatrix();
@@ -580,6 +628,11 @@ void ofApp::keyPressed(int key) {
 		else cam.enableMouseInput();
 		break;
 	case 'D':
+	case 'e': //explosion
+		//emitter.sys->reset();
+		emitter.start();
+		cout << "emitter started" << endl; 
+		break;
 	case 'F':
 	case 'f':
 		ofToggleFullscreen();

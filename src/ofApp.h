@@ -46,7 +46,9 @@ class ofApp : public ofBaseApp{
 		bool mouseIntersectPlane(ofVec3f planePoint, ofVec3f planeNorm, ofVec3f &point);
 		bool raySelectWithOctree(ofVec3f &pointRet);
 		glm::vec3 getMousePointOnPlane(glm::vec3 p , glm::vec3 n);
-		void loadVbo();
+		//void loadVbo(ParticleEmitter e);
+		void loadVbo(); 
+		void loadVbo2();
 		void devMode(); 
 		void fuelDraw(); 
 		void landerMovement(ofVec3f m);
@@ -86,6 +88,9 @@ class ofApp : public ofBaseApp{
 			GravityForce grav;
 			ImpulseForce impulse;  // test for collisions;
 		//** Particle system and gravity end **//
+
+		// explosion
+		ParticleEmitter emitter;
 
 		bool bHide;
 			ofxIntSlider numLevels;	// octree levels
@@ -153,7 +158,7 @@ class ofApp : public ofBaseApp{
 
 		// shaders
 		//
-		ofVbo vbo;
+		ofVbo vbo, vbo2; // vbo for booster, vbo2 for explosion
 		ofShader shader;
 
 		ofSoundPlayer   boosterSound;
