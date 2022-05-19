@@ -75,12 +75,12 @@ void ofApp::setup(){
 	//
 	initLightingAndMaterials();
 
-	lunar.loadModel("geo/mars-low-5x-v2.obj");
+	lunar.loadModel("geo/moon_surface 2.obj");
 	lunar.setScaleNormalization(false);
 
 
 	//Loading lander without drag+drop
-	if (lander.loadModel("geo/lander.obj")){
+	if (lander.loadModel("geo/saucerTest2.obj")){
 		lander.setScaleNormalization(false);
 		lander.setPosition(1, 2, 0);
 
@@ -352,7 +352,7 @@ void ofApp::draw() {
 		glDisable(GL_CULL_FACE);
 		ofSetColor(255);
 		ofDisableLighting();
-		ofDrawBitmapString(instructions, 1000, 20);
+		ofDrawBitmapString(instructions, 1000, 20); 
 	}
 
 	if (!bHide) gui.draw(); //keep this near the top of draw(), or it will not show correctly 
