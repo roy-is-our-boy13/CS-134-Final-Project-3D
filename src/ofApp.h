@@ -53,6 +53,7 @@ class ofApp : public ofBaseApp{
 		void landerMovement(ofVec3f m);
 		void cameraSetup(); 
 		void updateCameras(); 
+		void setupLights(); 
 
 		//for fuel 
 		float startTime; // store when we start time timer
@@ -76,7 +77,7 @@ class ofApp : public ofBaseApp{
 		ofxAssimpModelLoader lunar, model; 
 		Lander lander; 
 
-		ofLight light;
+		//ofLight light;
 		Box boundingBox, landerBounds; 
 		Box testBox;
 		vector<Box> colBoxList;
@@ -108,7 +109,7 @@ class ofApp : public ofBaseApp{
 			ofxFloatSlider restitution;	// bounceback
 			ofxIntSlider thrustStr; // strength of the thrust, aka speed?
 
-			ofxFloatSlider camDistance; // this is the distance of the current camera view
+
 			ofxPanel gui;
 		
 
@@ -136,7 +137,11 @@ class ofApp : public ofBaseApp{
 		ParticleSystem* sys;
 
 
-		//ofLight keyLight, fillLight, rimLight, light;
+		ofLight keyLight; 
+		ofLight fillLight; 
+		ofLight rimLight; 
+		ofLight light;
+
 		ofPlanePrimitive plane;
 		ofMaterial planeMaterial;
 
@@ -147,7 +152,7 @@ class ofApp : public ofBaseApp{
 		
 		//ofxPanel gui;
 		
-		ofxToggle keyEnabled, fillEnabled, rimEnabled;
+		/*ofxToggle keyEnabled, fillEnabled, rimEnabled;
 
 		ofxVec3Slider keyPosition, keyDiffuse, keySpecular;
 
@@ -155,7 +160,7 @@ class ofApp : public ofBaseApp{
 
 		ofxVec3Slider rimPosition, rimDiffuse, rimSpecular;
 
-		ofxFloatSlider planeShiningess;
+		ofxFloatSlider planeShiningess;*/
 
 		// textures
 		//

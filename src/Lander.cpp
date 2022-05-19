@@ -36,7 +36,7 @@ void Lander::integrate()
 	//forces.set(0, 0, 0);
 	forces.set(gravity.x, gravity.y, gravity.z); //	We always have gravity, so reset it by reapplying the gravity?
 	thrustEmitter.setPosition(position);
-	light.setPosition(position); 
+	//light.setPosition(position); 
 	explodeEmitter.setPosition(position);
 }
 

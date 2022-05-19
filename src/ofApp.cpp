@@ -104,6 +104,7 @@ void ofApp::setup(){
     gui.add(gravity.setup("Gravity", 0, 0, 20));
 	gui.add(radius.setup("Radius", .01, .01, 1.0));
 	gui.add(restitution.setup("Restitution", .85, 0, 1.0));
+
 	bHide = false;
 
 	//  Create Octree for testing.
@@ -152,47 +153,10 @@ void ofApp::setup(){
 	lander.explodeEmitter.setEmitterType(RadialEmitter);
 	lander.explodeEmitter.setOneShot(true);
 	lander.explodeEmitter.setGroupSize(100);
+	lander.explodeEmitter.setParticleRadius(radius*2);
 	//lander.explodeEmitter.setLifespan(1);
 
-	// Setup 3 - Light System
-	// 
-	/*
-	keyLight.setup();
-	keyLight.enable();
-	keyLight.setAreaLight(1, 1);
-	keyLight.setAmbientColor(ofFloatColor(0.1, 0.1, 0.1));
-	keyLight.setDiffuseColor(ofFloatColor(1, 1, 1));
-	keyLight.setSpecularColor(ofFloatColor(1, 1, 1));
-
-	keyLight.rotate(45, ofVec3f(0, 1, 0));
-	keyLight.rotate(-45, ofVec3f(1, 0, 0));
-	keyLight.setPosition(5, 5, 5);
-
-	fillLight.setup();
-	fillLight.enable();
-	fillLight.setSpotlight();
-	fillLight.setScale(.05);
-	fillLight.setSpotlightCutOff(15);
-	fillLight.setAttenuation(2, .001, .001);
-	fillLight.setAmbientColor(ofFloatColor(0.1, 0.1, 0.1));
-	fillLight.setDiffuseColor(ofFloatColor(1, 1, 1));
-	fillLight.setSpecularColor(ofFloatColor(1, 1, 1));
-	fillLight.rotate(-10, ofVec3f(1, 0, 0));
-	fillLight.rotate(-45, ofVec3f(0, 1, 0));
-	fillLight.setPosition(-5, 5, 5);
-
-	rimLight.setup();
-	rimLight.enable();
-	rimLight.setSpotlight();
-	rimLight.setScale(.05);
-	rimLight.setSpotlightCutOff(30);
-	rimLight.setAttenuation(.2, .001, .001);
-	rimLight.setAmbientColor(ofFloatColor(0.1, 0.1, 0.1));
-	rimLight.setDiffuseColor(ofFloatColor(1, 1, 1));
-	rimLight.setSpecularColor(ofFloatColor(1, 1, 1));
-	rimLight.rotate(180, ofVec3f(0, 1, 0));
-	rimLight.setPosition(0, 5, -7);*/
-
+	setupLights();
 }
 //--------------------------------------------------------------
 //
@@ -271,7 +235,6 @@ void ofApp::checkCollisions() { //TODO: currently this is off of particle positi
 	// for each particle, determine if we hit the groud plane.
 	//
 
-	//TODO: It looks like the collisions are actually being detected, but are they being normalized? How do I resolve interpenetrations?
 	ofVec3f min = lander.getSceneMin() + lander.getPosition();
 	ofVec3f max = lander.getSceneMax() + lander.getPosition();
 
@@ -289,7 +252,8 @@ void ofApp::checkCollisions() { //TODO: currently this is off of particle positi
 		// crashVelocity is a float that we can set in the gui
 		if (vel.length() > 1) 
 		{
-			lander.explodeEmitter.start();
+			//TODO: re-enable
+			//lander.explodeEmitter.start(); 
 		}
 		// tell lander to explode
 		// lander uses a explode function to set off particles explosion and delete itself
@@ -297,7 +261,7 @@ void ofApp::checkCollisions() { //TODO: currently this is off of particle positi
 		
 		// apply impulse function
 		//
-		ofVec3f norm = ofVec3f(0, 1, 0);  // TODO: this should be normalizing the mesh/vertices(?)
+		ofVec3f norm = ofVec3f(0, 1, 0); 
 		ofVec3f f = (restitution + 1.0) * ((-vel.dot(norm)) * norm);
 		//cout << "f: " << f << endl; //the force we're applying to the lander
 		//cout << "lander.forces: " << lander.forces << endl;
@@ -374,6 +338,7 @@ void ofApp::update()
 }
 //--------------------------------------------------------------
 void ofApp::draw() {
+
 	loadVbo(); 
 	loadVbo2(); 
 	//loadVbo(lander.thrustEmitter);
@@ -411,6 +376,11 @@ void ofApp::draw() {
 	vbo2.draw(GL_POINTS, 0, (int)lander.explodeEmitter.sys->particles.size()); //add vbo for explosion, then add this
 	particleTex.unbind();
 	ofEnableLighting(); 
+
+	//keyLight.draw();
+	//fillLight.draw();
+	//rimLight.draw();
+
 	ofPushMatrix();
 	if (bWireframe) {                    // wireframe mode  (include axis)
 		ofDisableLighting();
@@ -1160,4 +1130,46 @@ void ofApp::cameraSetup() {
 void ofApp::updateCameras() {
 	cam1.lookAt(lander.position); 
 	cam2.setPosition(lander.position.x, lander.position.y + 10, lander.position.z); //TODO: this seems to create issues with the movement 
+}
+//--------------------------------------------------------------
+// separated for easy readability 
+void ofApp::setupLights() {
+	// Setup 3 - Light System
+	// 
+
+	keyLight.setup();
+	keyLight.enable();
+	keyLight.setAreaLight(50, 50);
+	keyLight.setAmbientColor(ofFloatColor(0.1, 0.1, 0.1));
+	keyLight.setDiffuseColor(ofFloatColor(1, 1, 1));
+	keyLight.setSpecularColor(ofFloatColor(1, 1, 1));
+
+	keyLight.rotate(45, ofVec3f(0, 1, 0));
+	keyLight.rotate(-45, ofVec3f(1, 0, 0));
+	keyLight.setPosition(5, 5, 5);
+
+	fillLight.setup();
+	fillLight.enable();
+	fillLight.setSpotlight();
+	fillLight.setScale(.05);
+	fillLight.setSpotlightCutOff(15);
+	fillLight.setAttenuation(2, .001, .001);
+	fillLight.setAmbientColor(ofFloatColor(0.1, 0.1, 0.1));
+	fillLight.setDiffuseColor(ofFloatColor(1, 1, 1));
+	fillLight.setSpecularColor(ofFloatColor(1, 1, 1));
+	fillLight.rotate(-10, ofVec3f(1, 0, 0));
+	fillLight.rotate(-45, ofVec3f(0, 1, 0));
+	fillLight.setPosition(-5, 5, 5);
+
+	rimLight.setup();
+	rimLight.enable();
+	rimLight.setSpotlight();
+	rimLight.setScale(.05);
+	rimLight.setSpotlightCutOff(30);
+	rimLight.setAttenuation(.2, .001, .001);
+	rimLight.setAmbientColor(ofFloatColor(0.1, 0.1, 0.1));
+	rimLight.setDiffuseColor(ofFloatColor(1, 1, 1));
+	rimLight.setSpecularColor(ofFloatColor(1, 1, 1));
+	rimLight.rotate(180, ofVec3f(0, 1, 0));
+	rimLight.setPosition(0, 5, -7);
 }
