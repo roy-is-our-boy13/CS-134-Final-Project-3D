@@ -30,6 +30,8 @@ public:
 	void	createParticles();
 	ParticleEmitter thrustEmitter;
 	void	stopParticles(); 
+	ParticleEmitter explodeEmitter;
+	void explode();
 
 	ofLight light;
 

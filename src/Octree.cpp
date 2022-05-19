@@ -172,7 +172,7 @@ void Octree::subdivide(const ofMesh & mesh, TreeNode & node, int numLevels, int 
 			if (pointsRtn.size() > 1) {
 				// if the child has more than one child, it isn't a leaf node. you need to call subdivide on that condition (recursively)
 				// cout << "call subdivide recursively #" << i << endl;
-				subdivide(mesh, node.children[node.children.size() - 1], numLevels, level++);
+				subdivide(mesh, node.children[node.children.size() - 1], numLevels, level + 1);
 			}
 		}
 	}
