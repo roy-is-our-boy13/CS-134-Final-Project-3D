@@ -38,6 +38,14 @@ void Lander::integrate()
 	thrustEmitter.setPosition(position);
 	//light.setPosition(position); 
 	explodeEmitter.setPosition(position);
+
+	//angular motion
+	/*setRotation(0, getRotationAngle(0) + angularVelocity * dt, 0, 1, 0);
+	rotation += (angularVelocity * dt);
+	float a = angularAcceleration;
+	a += (angularForce * 1.0 / mass);
+	angularVelocity += a * dt;
+	angularVelocity *= damping;*/
 }
 
 //void Lander::setPosition(float x, float y, float z) {

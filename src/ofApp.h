@@ -54,6 +54,8 @@ class ofApp : public ofBaseApp{
 		void cameraSetup(); 
 		void updateCameras(); 
 		void setupLights(); 
+		void aboveGroundLevel();
+		void loseCondition(); //ran if the player lost in some way (no more fuel, hard landing, crash landing)
 
 		//for fuel 
 		float startTime; // store when we start time timer
@@ -176,6 +178,15 @@ class ofApp : public ofBaseApp{
 
 		ofImage background;
 
+		bool started = false; //game starts the first time that a player uses the up thruster 
+		bool outOfBounds = true; //if it touches the ground while this is true, it's a fail condition. gets set to false if in lander. 
+		bool crashLanding = false; //hit the ground too hard
+		bool noMoreFuel = false; //ran out of fuel while playing 
+		bool wonGame = false; 
+		bool gameOver = false;
+
+		string msg = string(""); 
+
 		bool showInstructions = false; 
 		string instructions = string("") + //TODO: ADD THE MOVEMENT KEYS
 			"\n" +
@@ -191,4 +202,6 @@ class ofApp : public ofBaseApp{
 			"f2: camera 2\n" +
 			"f3: camera 3\n" +
 			"backspace: reset lander position\n";
+
+		string agl = string("") + "Current AGL: ";
 };

@@ -152,7 +152,7 @@ void ofApp::setup(){
 	lander.explodeEmitter.sys->addForce(new CyclicForce(0));
 	lander.explodeEmitter.setEmitterType(RadialEmitter);
 	lander.explodeEmitter.setOneShot(true);
-	lander.explodeEmitter.setGroupSize(100);
+	lander.explodeEmitter.setGroupSize(50);
 	lander.explodeEmitter.setParticleRadius(radius*2);
 	//lander.explodeEmitter.setLifespan(1);
 
@@ -309,6 +309,7 @@ void ofApp::checkCollisions() { //TODO: currently this is off of particle positi
 //
 void ofApp::update() 
 {
+	if (timer >= 7000 && !started) { started = true; } //game has started
 	checkCollisions();
 
 	// for the lander movement
@@ -504,7 +505,25 @@ void ofApp::draw() {
 	ofEnableAlphaBlending();
 
 	fuelDraw(); //to draw the fuel bar
+	aboveGroundLevel(); //write the current agl 
 
+	if (gameOver) { //TODO: disable controls (except for restart?) 
+		if (wonGame) {
+			msg = "YOU WIN!!!";
+		}
+		else if (noMoreFuel) {
+			msg = "GAME OVER! You ran out of fuel!";
+		}
+		else if (crashLanding) {
+			msg = "GAME OVER! You had a crash landing!";
+		}
+		else { //out of bounds
+			msg = "GAME OVER! You landed in the wrong spot!";
+		}
+		ofSetColor(255, 255, 255);
+		ofDisableLighting();
+		ofDrawBitmapString(msg, (ofGetWidth() / 2)-150, (ofGetHeight() / 2));
+	}
 
 	//--
 	// Draw annotations (text, gui, etc)
@@ -788,7 +807,27 @@ bool ofApp::raySelectWithOctree(ofVec3f &pointRet) {
 	cout << "touching the lander:" << pointSelected << endl; 
 	return pointSelected;
 }
+//--------------------------------------------------------------
+// get the ray altitude for the AGL (above ground level) 
+void ofApp::aboveGroundLevel() {
+	float altitude = 0;
+	Ray ray = Ray(Vector3(lander.getPosition().x, lander.getPosition().y, lander.getPosition().z), Vector3(0, -1, 0));
+	if (octree.intersect(ray, octree.root, selectedNode)) {
+		altitude = lander.getPosition().y - selectedPoint.y;
+	}
+	agl = string("") + "Current AGL: " + ofToString(altitude + 0.5);
 
+	ofSetColor(255, 255, 255);
+	ofDrawBitmapString(agl, (ofGetWidth() / 2) + 300 , (ofGetHeight() - 80));
+
+	if (altitude < 2 && started) { //if you get too close to the ground and the game is currently running, 
+		if (outOfBounds) { //you landed, but it's not in the correct area
+			cout << "landed out of bounds" << endl; 
+			gameOver = true;
+			loseCondition(); 
+		}
+	}
+}
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button) {
@@ -1083,7 +1122,9 @@ void ofApp::fuelDraw() {
     if(bTimerReached) {
         ofSetColor(255, 255, 255);
         ofDrawBitmapString("Out of fuel!", (ofGetWidth()-100)/2, (ofGetHeight()-50));
-				//TODO: this is the lose condition, need to code the loss
+		noMoreFuel = true; 
+		gameOver = true; 
+		loseCondition(); 
     }
 }
 //--------------------------------------------------------------
@@ -1173,3 +1214,11 @@ void ofApp::setupLights() {
 	rimLight.rotate(180, ofVec3f(0, 1, 0));
 	rimLight.setPosition(0, 5, -7);
 }
+//--------------------------------------------------------------
+// ran if the player lost in some way (no more fuel, hard landing, crash landing)
+void ofApp::loseCondition() {
+	cout << "lost game" << endl; 
+	gameOver = true; 
+	lander.explodeEmitter.start(); //there is an explosion 
+}
+//--------------------------------------------------------------
