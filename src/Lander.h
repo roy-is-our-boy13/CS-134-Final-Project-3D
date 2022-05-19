@@ -9,6 +9,7 @@
 // this makes the implementation much easier (nothing to change in ofApp.cpp)
 // All I'm adding is the physics integrator, which will allow us to give the lander some thrust and let gravity work on it
 
+// Made by: Roy and Lauren
 class Lander : public ofxAssimpModelLoader {
 public:
 	//Lander(){}; //no instance of lander, only used to do work on the lander

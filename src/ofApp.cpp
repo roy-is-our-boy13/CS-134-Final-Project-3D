@@ -15,7 +15,7 @@
 
 //--------------------------------------------------------------
 // setup scene, lighting, state and load geometry
-//
+// ***Modified*** by: Roy and Lauren
 void ofApp::setup(){
 	bTimerReached = false;
     startTime = ofGetElapsedTimeMillis();  // get the start time
@@ -159,25 +159,7 @@ void ofApp::setup(){
 	setupLights();
 }
 //--------------------------------------------------------------
-//
-// load vertex buffer in preparation for rendering
-//
-//void ofApp::loadVbo(ParticleEmitter e) { //TODO: add something like this for the explosion emitter
-//	if (e.sys->particles.size() < 1) return;
-//
-//	vector<ofVec3f> sizes;
-//	vector<ofVec3f> points;
-//	for (int i = 0; i < e.sys->particles.size(); i++) {
-//		points.push_back(lander.thrustEmitter.sys->particles[i].position);
-//		sizes.push_back(ofVec3f(radius));
-//	}
-//	// upload the data to the vbo
-//	//
-//	int total = (int)points.size();
-//	vbo.clear();
-//	vbo.setVertexData(&points[0], total, GL_STATIC_DRAW);
-//	vbo.setNormalData(&sizes[0], total, GL_STATIC_DRAW);
-//}
+
 void ofApp::loadVbo() {
 	if (lander.thrustEmitter.sys->particles.size() < 1) return;
 
@@ -213,7 +195,8 @@ void ofApp::loadVbo2() {
 }
 //--------------------------------------------------------------
 //
-//	FROM: examples/particleBouncingBall, written by prof. smith
+// BASED ON: examples/particleBouncingBall, written by prof. smith
+// Made by: Roy and Lauren
 void ofApp::checkCollisions() { //TODO: currently this is off of particle position. We need to change it to OCTREE collisions
 	ofVec3f min = lander.getSceneMin() + lander.getPosition();
 	ofVec3f max = lander.getSceneMax() + lander.getPosition();
@@ -251,7 +234,7 @@ void ofApp::checkCollisions() { //TODO: currently this is off of particle positi
  
 //--------------------------------------------------------------
 // incrementally update scene (animation)
-//
+// MODIFIED BY: Roy and Lauren
 void ofApp::update() 
 {
 	if (timer >= 1000 && !started) { started = true; } //game has started
@@ -284,6 +267,7 @@ void ofApp::update()
 	lander.explodeEmitter.update();
 }
 //--------------------------------------------------------------
+// MODIFIED BY: Roy and Lauren
 void ofApp::draw() {
 
 	loadVbo(); 
@@ -502,7 +486,7 @@ void ofApp::drawAxis(ofVec3f location) {
 	ofPopMatrix();
 }
 
-
+//MODIFIED BY: Roy and Lauren
 void ofApp::keyPressed(int key) {
 
 	switch (key) { //TODO: thrust strength might be too weak at the moment
@@ -630,7 +614,7 @@ void ofApp::toggleSelectTerrain() {
 void ofApp::togglePointsDisplay() {
 	bDisplayPoints = !bDisplayPoints;
 }
-
+//MODIFIED BY: Roy and Lauren
 void ofApp::keyReleased(int key) {
 
 	switch (key) {
@@ -742,6 +726,7 @@ bool ofApp::raySelectWithOctree(ofVec3f &pointRet) {
 }
 //--------------------------------------------------------------
 // get the ray altitude for the AGL (above ground level) 
+// Made by: Roy and Lauren
 void ofApp::aboveGroundLevel() {
 	float altitude = 0;
 	Ray ray = Ray(Vector3(lander.getPosition().x, lander.getPosition().y, lander.getPosition().z), Vector3(0, -1, 0));
@@ -1024,6 +1009,7 @@ void ofApp::devMode(){
 
 }
 //--------------------------------------------------------------
+// Made by: Lauren
 void ofApp::fuelDraw() {
 		// "Turns off depth testing so rendering happens in draw order rather than by z-depth. Turning off depth test is useful for combining 3d scenes with 2d overlays such as a control panel."
 		ofDisableDepthTest(); 
@@ -1068,6 +1054,7 @@ void ofApp::fuelDraw() {
 }
 //--------------------------------------------------------------
 //take the movement input dictated by the key pressed, then apply the timer
+// Made by: Roy and Lauren
 void ofApp::landerMovement(ofVec3f m){
 	if (!timerStarted){ // only reset when we're applying thrust for the first time (not repeatedly)
 		ofResetElapsedTimeCounter();  
@@ -1080,6 +1067,7 @@ void ofApp::landerMovement(ofVec3f m){
 }
 //--------------------------------------------------------------
 // sets up the camera and works as a return state if we need to 'reset' the camera
+// MODIFIED by: Roy and Lauren
 void ofApp::cameraSetup() { 
 	camToView = 0; //which camera do we begin by looking at? 
 	// camToConfigure = 1; //this is the camera that's following
@@ -1113,6 +1101,7 @@ void ofApp::updateCameras() {
 }
 //--------------------------------------------------------------
 // separated for easy readability 
+// taken from monster lighting assignment
 void ofApp::setupLights() {
 	// Setup 3 - Light System
 	// 
@@ -1155,6 +1144,7 @@ void ofApp::setupLights() {
 }
 //--------------------------------------------------------------
 // ran if the player lost in some way (no more fuel, hard landing, crash landing)
+// Made by: Roy and Lauren
 void ofApp::loseCondition() {
 	gameOver = true; 
 	lander.explodeEmitter.start(); //there is an explosion 

@@ -146,7 +146,8 @@ void Octree::create(const ofMesh & geo, int numLevels) {
 	level++;
     subdivide(mesh, root, numLevels, level);
 }
-             
+
+// Made by: Roy and Lauren             
 void Octree::subdivide(const ofMesh & mesh, TreeNode & node, int numLevels, int level) {
 	if (level >= numLevels) return;
 
@@ -180,7 +181,7 @@ void Octree::subdivide(const ofMesh & mesh, TreeNode & node, int numLevels, int 
 
 // Implement functions below for Homework project
 //
-
+// Made by: Roy and Lauren
 bool Octree::intersect(const Ray &ray, const TreeNode & node, TreeNode & nodeRtn) {
 	bool intersects = false;
 	intersects = node.box.intersect(ray, -1000, 1000); //returns true if in the valid hit range of the ray 
@@ -199,7 +200,7 @@ bool Octree::intersect(const Ray &ray, const TreeNode & node, TreeNode & nodeRtn
 
 	return intersects;
 }
-
+// Made by: Roy and Lauren
 bool Octree::intersect(const Box &box, TreeNode & node, vector<Box> & boxListRtn) {
 	bool intersects = false;
 

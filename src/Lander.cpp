@@ -5,7 +5,7 @@
 
 
 // This is the actual integrator 
-//
+// Made by: Roy and Lauren
 void Lander::integrate() 
 {
 	float framerate = ofGetFrameRate();
@@ -67,16 +67,19 @@ void Lander::applyGravity() {
 }
 
 //	applying the thrust from any direction
+// Made by: Roy and Lauren
 void Lander::applyThrust(ofVec3f t) {
 	forces += t; 
 }
 
+// Made by: Roy and Lauren
 void Lander::createParticles() 
 {
 	//thrustEmitter.sys->reset(); 
 	thrustEmitter.start();
 }
 
+// Made by: Roy and Lauren
 void Lander::stopParticles()
 {
 	thrustEmitter.sys->reset();
