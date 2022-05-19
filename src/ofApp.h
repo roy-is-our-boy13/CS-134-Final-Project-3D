@@ -56,6 +56,7 @@ class ofApp : public ofBaseApp{
 		void setupLights(); 
 		void aboveGroundLevel();
 		void loseCondition(); //ran if the player lost in some way (no more fuel, hard landing, crash landing)
+		void winGame(); //When player wins the game. 
 
 		//for fuel 
 		float startTime; // store when we start time timer
@@ -179,8 +180,7 @@ class ofApp : public ofBaseApp{
 		ofImage background;
 
 		bool started = false; //game starts the first time that a player uses the up thruster 
-		bool outOfBounds = true; 
-		bool insideArea = false;
+		bool outOfBounds = true; //if it touches the ground while this is true, it's a fail condition. gets set to false if in lander. 
 		bool crashLanding = false; //hit the ground too hard
 		bool noMoreFuel = false; //ran out of fuel while playing 
 		bool wonGame = false; 
