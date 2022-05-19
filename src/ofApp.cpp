@@ -75,12 +75,12 @@ void ofApp::setup(){
 	//
 	initLightingAndMaterials();
 
-	lunar.loadModel("geo/moon_surface 2.obj");
+	lunar.loadModel("geo/mars-low-5x-v2.obj");
 	lunar.setScaleNormalization(false);
 
 
 	//Loading lander without drag+drop
-	if (lander.loadModel("geo/saucerTest2.obj")){
+	if (lander.loadModel("geo/lander.obj")){
 		lander.setScaleNormalization(false);
 		lander.setPosition(1, 2, 0);
 
@@ -101,7 +101,7 @@ void ofApp::setup(){
 	gui.add(lifespan.setup("Lifespan", 2.0, .1, 10.0));
 	gui.add(rate.setup("Rate", 1.0, .5, 60.0));
 	gui.add(damping.setup("Damping", .99, .1, 1.0));
-    gui.add(gravity.setup("Gravity", 0, 0, 20));
+    gui.add(gravity.setup("Gravity", 2, 0, 20));
 	gui.add(radius.setup("Radius", .01, .01, 1.0));
 	gui.add(restitution.setup("Restitution", .85, 0, 1.0));
 
@@ -125,7 +125,7 @@ void ofApp::setup(){
 	//landerParticle.start();
 	landerParticle.setLifespan(20000);
 
-	lander.setGravity(ofVec3f(0, -1.0, 0)); //set gravity for the rest of the program
+	lander.setGravity(ofVec3f(0, -gravity, 0)); //set gravity for the rest of the program
 
 	sys = landerParticle.sys;
 	grav.set(ofVec3f(0, -1.0, 0));
@@ -278,29 +278,6 @@ void ofApp::checkCollisions() { //TODO: currently this is off of particle positi
 		lander.setGravity(ofVec3f(0, -1.0, 0)); //set gravity for the rest of the program
 
 	}
-	// cout << "lander velocity: " << lander.velocity <<
-	// 	"\nlander.forces: " << lander.forces <<
-	// 	"\nAFTER ADDITION: " << lander.forces <<
-	// 	"\n==============================================================================" << endl;
-
-	//for (int i = 0; i < landerParticle.sys->particles.size(); i++) {
-
- //      // only bother to check for descending particles.
- //      //
-	//	ofVec3f vel = landerParticle.sys->particles[i].velocity; // velocity of particle
-	//	if (vel.y >= 0) break;                             // ascending;
-
-	//	ofVec3f pos = landerParticle.sys->particles[i].position;
-	//	//cout << "pos.y =" << pos.y << endl;
-	//	if (pos.y < landerParticle.sys->particles[i].radius) {
-	//		cout << "impulse function" << endl; 
-	//		// apply impulse function
-	//		//
-	//		ofVec3f norm = ofVec3f(0, 1, 0);  // just use vertical for normal for now
-	//		ofVec3f f = (restitution + 1.0)*((-vel.dot(norm))*norm);
-	//		landerParticle.sys->particles[i].forces += ofGetFrameRate() * f;
-	//	}
-	//}
 
 }
  
@@ -309,7 +286,8 @@ void ofApp::checkCollisions() { //TODO: currently this is off of particle positi
 //
 void ofApp::update() 
 {
-	if (timer >= 7000 && !started) { started = true; } //game has started
+	if (timer >= 4500 && !started) { started = true; } //game has started
+	lander.setGravity(ofVec3f(0, -gravity, 0));
 	checkCollisions();
 
 	// for the lander movement
@@ -352,7 +330,7 @@ void ofApp::draw() {
 		glDisable(GL_CULL_FACE);
 		ofSetColor(255);
 		ofDisableLighting();
-		ofDrawBitmapString(instructions, 1000, 20); 
+		ofDrawBitmapString(instructions, 1000, 20);
 	}
 
 	if (!bHide) gui.draw(); //keep this near the top of draw(), or it will not show correctly 
@@ -367,7 +345,7 @@ void ofApp::draw() {
 	glDepthMask(true);
 
 	 theCam->begin(); 
-	//shader.begin();
+	shader.begin();
 
 	// draw particle emitter here..
 	//
@@ -413,18 +391,6 @@ void ofApp::draw() {
 			}
 			ofVec3f min = lander.getSceneMin() + lander.getPosition();
 			ofVec3f max = lander.getSceneMax() + lander.getPosition();
-
-			Box bounds = Box(Vector3(min.x, min.y, min.z), Vector3(max.x, max.y, max.z));
-			ofNoFill(); // prevents holding box from filling white
-			ofSetColor(ofColor::white);
-			Octree::drawBox(bounds);
-
-			// draw colliding boxes
-			//
-			ofSetColor(ofColor::red);
-			for (int i = 0; i < colBoxList.size(); i++) {
-				Octree::drawBox(colBoxList[i]);
-			}
 
 			if (bLanderSelected) {
 
@@ -497,7 +463,7 @@ void ofApp::draw() {
 
 	ofPopMatrix();
 
-	//shader.end();
+	shader.end();
 	 theCam->end();
 
 	ofDisablePointSprites();
@@ -594,6 +560,9 @@ void ofApp::keyPressed(int key) {
 		cout << "right" << endl;
 		landerMovement(ofVec3f(1 * thrustStr, 0, 0)); 
 		break;
+	case OF_KEY_SHIFT:	//go down
+		landerMovement(ofVec3f(0, -1 * thrustStr, 0));
+		break;
 	case 'B':
 	case 'b':
 		bDisplayBBoxes = !bDisplayBBoxes;
@@ -673,10 +642,6 @@ void ofApp::keyPressed(int key) {
 	case OF_KEY_F3:
 		cout << "camToView: 2" << endl;
 		 theCam = &cam2;
-		break;
-	case OF_KEY_SHIFT:				// release a particle
-		//landerParticle.start(); //TODO: How do we use this to relaunch the same particle more than once?
-		//if (landerParticle.sys->particles.size() <= 0) { landerParticle.start(); } //TODO: uncomment to start the game?
 		break;
 	case OF_KEY_BACKSPACE:				// return lander to original pos
 		lander.position = ofVec3f(1, 1, 0); 
@@ -820,9 +785,15 @@ void ofApp::aboveGroundLevel() {
 	ofSetColor(255, 255, 255);
 	ofDrawBitmapString(agl, (ofGetWidth() / 2) + 300 , (ofGetHeight() - 80));
 
-	if (altitude < 2 && started) { //if you get too close to the ground and the game is currently running, 
-		if (outOfBounds) { //you landed, but it's not in the correct area
-			cout << "landed out of bounds" << endl; 
+	if (altitude <= 2 && started) { //if you get too close to the ground and the game is currently running, 
+		//find the velocity of the lander, if it's over gravity+somenumber, then it's a hard landing 
+		if (lander.velocity.x >= (-gravity-2)) {
+			//cout << "greater than gravity" << endl; 
+			gameOver = true; 
+			crashLanding = true; 
+			loseCondition(); 
+		}
+		else if (outOfBounds) { //you landed, but it's not in the correct area
 			gameOver = true;
 			loseCondition(); 
 		}

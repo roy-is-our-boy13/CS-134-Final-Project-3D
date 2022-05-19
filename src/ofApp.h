@@ -179,7 +179,8 @@ class ofApp : public ofBaseApp{
 		ofImage background;
 
 		bool started = false; //game starts the first time that a player uses the up thruster 
-		bool outOfBounds = true; //if it touches the ground while this is true, it's a fail condition. gets set to false if in lander. 
+		bool outOfBounds = true; 
+		bool insideArea = false;
 		bool crashLanding = false; //hit the ground too hard
 		bool noMoreFuel = false; //ran out of fuel while playing 
 		bool wonGame = false; 
