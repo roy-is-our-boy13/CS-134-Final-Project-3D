@@ -134,7 +134,7 @@ void ofApp::setup(){
 	//Lander Thrust Particles Setup.
 	lander.thrustEmitter.init();
 	lander.thrustEmitter.setLifespan(1);
-	lander.thrustEmitter.setRate(50);
+	lander.thrustEmitter.setRate(100);
 	lander.thrustEmitter.setVelocity(glm::vec3(0, -1, 0));
 	lander.thrustEmitter.setParticleRadius(radius);
 
@@ -358,6 +358,7 @@ void ofApp::update()
 	//}
 
 	lander.thrustEmitter.update();
+	updateCameras(); // change camera location/lookAt 
 }
 //--------------------------------------------------------------
 void ofApp::draw() {
@@ -368,6 +369,13 @@ void ofApp::draw() {
 
 	ofSetColor(ofColor::white); 
 	background.draw(0, 0);
+
+	if (showInstructions) {
+		glDisable(GL_CULL_FACE);
+		ofSetColor(255);
+		ofDisableLighting();
+		ofDrawBitmapString(instructions, 1000, 20);
+	}
 
 	if (!bHide) gui.draw(); //keep this near the top of draw(), or it will not show correctly 
 
@@ -390,7 +398,7 @@ void ofApp::draw() {
 	vbo.draw(GL_POINTS, 0, (int)lander.thrustEmitter.sys->particles.size());
 	vbo2.draw(GL_POINTS, 0, (int)emitter.sys->particles.size()); //add vbo for explosion, then add this
 	particleTex.unbind();
-
+	ofEnableLighting(); 
 	ofPushMatrix();
 	if (bWireframe) {                    // wireframe mode  (include axis)
 		ofDisableLighting();
@@ -504,11 +512,6 @@ void ofApp::draw() {
 	landerParticle.draw(); //particle(?) for the lander movement
 
 	ofPopMatrix();
-	
-	//TODO: draw these?
-	/*cam.draw();
-	cam1.draw();
-	cam2.draw();*/
 
 	//shader.end();
 	 theCam->end();
@@ -566,26 +569,26 @@ void ofApp::drawAxis(ofVec3f location) {
 
 void ofApp::keyPressed(int key) {
 
-	switch (key) { //TODO: thrust strength might be too strong at the moment, or the gravity is too weak
+	switch (key) { //TODO: thrust strength might be too weak at the moment
 	case ' ': //apply up booster
 		landerMovement(ofVec3f(0, 1*thrustStr, 0)); 
 		//Tell lander to create particles with its thrust emitter
 		//lander needs a new method that handles creating particles.
-		lander.createParticles();
+		//lander.createParticles();
 		break;
-	case OF_KEY_UP: // forward
+	case 'w': // forward
 		cout << "forward" << endl; 
 		landerMovement(ofVec3f(0, 0, -1 * thrustStr)); 
 		break; 
-	case OF_KEY_LEFT: // left
+	case 'a': // left
 		cout << "left" << endl;
 		landerMovement(ofVec3f(-1 * thrustStr, 0, 0)); 
 		break;
-	case OF_KEY_DOWN: // back
+	case 's': // back
 		cout << "back" << endl;
 		landerMovement(ofVec3f(0, 0, 1 * thrustStr));
 		break;
-	case OF_KEY_RIGHT: // right
+	case 'd': // right
 		cout << "right" << endl;
 		landerMovement(ofVec3f(1 * thrustStr, 0, 0)); 
 		break;
@@ -608,8 +611,16 @@ void ofApp::keyPressed(int key) {
 	case 'f':
 		ofToggleFullscreen();
 		break;
+	case 'g': //toggle gui
+		if (bHide) { bHide = false; }
+		else { bHide = true; }
+		break;
 	case 'H':
 	case 'h':
+		break;
+	case 'i': //toggle instructions
+		if (showInstructions) { showInstructions = false; }
+		else { showInstructions = true; }
 		break;
 	case 'L':
 	case 'l':
@@ -619,18 +630,17 @@ void ofApp::keyPressed(int key) {
 	case 'o':
 		bDisplayOctree = !bDisplayOctree;
 		break;
-	case 'r':
-		cam.reset();
+	case 'r': // reset the camera
+		cameraSetup(); 
 		break;
-	case 's':
-		savePicture();
-		break;
+	//case 's':
+	//	savePicture();
+	//	break;
 	case 't':
 		setCameraTarget();
 		break;
 	case 'u': //** RESET THE POSITION OF THE STARTING PARTICLE
 		//ofVec3f vel = landerParticle.sys->particles[0].position;
-
 		landerParticle.sys->particles[0].position = ofVec3f(1, 1, 0);
 		break;
 	case 'v':
@@ -638,9 +648,9 @@ void ofApp::keyPressed(int key) {
 		break;
 	case 'V':
 		break;
-	case 'w':
-		toggleWireframeMode();
-		break;
+	//case 'w':
+	//	toggleWireframeMode();
+	//	break;
 	case OF_KEY_ALT:
 		cam.enableMouseInput();
 		bAltKeyDown = true;
@@ -666,8 +676,8 @@ void ofApp::keyPressed(int key) {
 		//landerParticle.start(); //TODO: How do we use this to relaunch the same particle more than once?
 		//if (landerParticle.sys->particles.size() <= 0) { landerParticle.start(); } //TODO: uncomment to start the game?
 		break;
-	case OF_KEY_BACKSPACE:				// return particle to original pos
-		//lander.position = ofVec3f(1, 1, 0); 
+	case OF_KEY_BACKSPACE:				// return lander to original pos
+		lander.position = ofVec3f(1, 1, 0); 
 		break;
 	default:
 		break;
@@ -1103,6 +1113,7 @@ void ofApp::landerMovement(ofVec3f m){
 	activeStart = ofGetElapsedTimeMillis(); // see how long we're holding the thrust down
 	lander.applyThrust(m);
 	if (!boosterSound.isPlaying()) { boosterSound.play(); }
+	lander.createParticles();
 }
 //--------------------------------------------------------------
 // sets up the camera and works as a return state if we need to 'reset' the camera
@@ -1111,43 +1122,29 @@ void ofApp::cameraSetup() {
 	// camToConfigure = 1; //this is the camera that's following
 
 	//reference 'cam' instead of 'theCam', because 'theCam' is just a pointer
-
 	for(int i=0; i<3; i++) {
-		cout << "camArray: " << i << endl; 
 		camArray[i].resetTransform();
-		camArray[i].setFov(65.5); //TODO: might change this
+		camArray[i].setFov(65.5); 
 		camArray[i].clearParent();
 	}
 
-	//TODO: reference for how to set the cameras. 
 	// setGlobalPosition shows where the camera is viewing from, while lookAt is the direction
-	//cam1.setGlobalPosition(glm::vec3(100, 0, 0));
-	//cam1.lookAt(glm::vec3(0, 0, 0));
 
-	//cam2.setGlobalPosition(glm::vec3(0, 150, 0));
-	//cam2.lookAt(glm::vec3(0, 0, 0));
-
-	//Top-down position
-	//cam1.setGlobalPosition(glm::vec3(0, 150, 0));
-	//cam1.lookAt(glm::vec3(0, 0, 0));
-
-	//cam2.setPosition(80, 40, 30);
-	// lookatIndex[1] = kNumTestNodes-1; // look at smallest node
-
-	//TODO: REQUIREMENTS: 
+	//REQUIREMENTS: 
 	// 1. easyCam that people can drag around, should be "cam" 
-	cam.setPosition(40, 40, 190);
+	cam.setPosition(20, 25, 80);
+	cam.lookAt(ofVec3f(1, 1, 0)); 
 
 	// 2. One "tracking" cam that stays aimed at the spacecraft from a fixed location 
-	cam1.setGlobalPosition(glm::vec3(50, 50, 50));
-	cam1.lookAt(glm::vec3(0, 0, 0));
+	cam1.setGlobalPosition(glm::vec3(25, 25, 25));
 
 	// 3. One onboard, developer chooses what direction the camera is pointing
-	cam2.setPosition(80, 40, 30);
+	cam2.setPosition(0, 0, 0);
 
 }
 //--------------------------------------------------------------
 // update things for the camera like the position, direction, etc
 void ofApp::updateCameras() {
-
+	cam1.lookAt(lander.position); 
+	cam2.setPosition(lander.position.x, lander.position.y + 10, lander.position.z); //TODO: this seems to create issues with the movement 
 }

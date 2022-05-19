@@ -171,4 +171,19 @@ class ofApp : public ofBaseApp{
 
 		ofImage background;
 
+		bool showInstructions = false; 
+		string instructions = string("") + //TODO: ADD THE MOVEMENT KEYS
+			"\n" +
+			"i: toggle instructions\n" +
+			"b: display boundary boxes\n" +
+			"c: enable camera adjustments\n" +
+			"f: toggle fullscreen\n" +
+			"g: toggle gui\n" +
+			"l: display leaf nodes\n" +
+			"o: display octree\n" +
+			"r: reset camera\n" +
+			"f1: camera 1\n" +
+			"f2: camera 2\n" +
+			"f3: camera 3\n" +
+			"backspace: reset lander position\n";
 };
