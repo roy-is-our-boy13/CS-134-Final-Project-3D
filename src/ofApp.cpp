@@ -82,7 +82,7 @@ void ofApp::setup(){
 	//Loading lander without drag+drop
 	if (lander.loadModel("geo/lander.obj")){
 		lander.setScaleNormalization(false);
-		lander.setPosition(1, 2, 0);
+		lander.setPosition(1, 40, 0);
 
 		bLanderLoaded = true;
 		for (int i = 0; i < lander.getMeshCount(); i++) {
@@ -97,13 +97,13 @@ void ofApp::setup(){
 	gui.setup();
 	gui.add(numLevels.setup("Number of Octree Levels", 1, 1, 10));
 	gui.add(velocity.setup("Initial Velocity", ofVec3f(25, 35, 0), ofVec3f(0, 0, 0), ofVec3f(100, 100, 100)));	// high on default, change to thruster?
-	gui.add(thrustStr.setup("Thrust", 5, 5, 100));
+	gui.add(thrustStr.setup("Thrust", 10, 5, 100));
 	gui.add(lifespan.setup("Lifespan", 2.0, .1, 10.0));
 	gui.add(rate.setup("Rate", 1.0, .5, 60.0));
 	gui.add(damping.setup("Damping", .99, .1, 1.0));
     gui.add(gravity.setup("Gravity", 2, 0, 20));
 	gui.add(radius.setup("Radius", .01, .01, 1.0));
-	gui.add(restitution.setup("Restitution", .85, 0, 1.0));
+	gui.add(restitution.setup("Restitution", .05, 0, 1.0));
 
 	bHide = false;
 
@@ -215,26 +215,6 @@ void ofApp::loadVbo2() {
 //
 //	FROM: examples/particleBouncingBall, written by prof. smith
 void ofApp::checkCollisions() { //TODO: currently this is off of particle position. We need to change it to OCTREE collisions
-
-	//Collision Detection(final proj)
-	//	* Take normal of each vertex from leaf nodes, and calculate average of them
-	//	- No rotations with spacecraft / lander, only apply impulse force
-	//	* Collision steps
-	//	1.) Detect Collision
-	//	2.) Get contact info
-	//		> Normal (normalize?)
-	//	3.) Resolve Interpenetrations
-	//		p' = p + v * dt
-	//		p = p' - v * dt
-	//	4.) Apply Impulse
-	//> Same formula for 2D applies for 3D(from Midterm test ? )
-	//> No friction or micro - collisions
-
-
-
-	// for each particle, determine if we hit the groud plane.
-	//
-
 	ofVec3f min = lander.getSceneMin() + lander.getPosition();
 	ofVec3f max = lander.getSceneMax() + lander.getPosition();
 
@@ -243,39 +223,27 @@ void ofApp::checkCollisions() { //TODO: currently this is off of particle positi
 
 	octree.intersect(bounds, octree.root, colBoxList); //colBoxList describes the octree boxes that the lander is colliding with
 
-	//for (int j = 0 ; j < colBoxList.size() ; j++) {
 	if(colBoxList.size() > 0) { //We want this restiition force once if there is any collision
 		lander.setGravity(ofVec3f(0, 0, 0)); //set gravity to ZERO
 		ofVec3f vel = lander.velocity; //access the velocity of the lander for the restitution bounce
-		//cout << "lander velocity: " << vel << endl;
+		cout << "lander velocity: " << vel << endl;
 
 		// crashVelocity is a float that we can set in the gui
-		if (vel.length() > 1) 
-		{
+		if (vel.length() > 1) {
 			//TODO: re-enable
 			//lander.explodeEmitter.start(); 
 		}
-		// tell lander to explode
-		// lander uses a explode function to set off particles explosion and delete itself
-		// might need to do other things like a game over screen or set a boolean flag to stop input from affecting the now noneexisitant lander
-		
+
 		// apply impulse function
 		//
 		ofVec3f norm = ofVec3f(0, 1, 0); 
+		if (vel.y > 0) { vel = -vel; } //trying to prevent infinite bounce loop
 		ofVec3f f = (restitution + 1.0) * ((-vel.dot(norm)) * norm);
-		//cout << "f: " << f << endl; //the force we're applying to the lander
-		//cout << "lander.forces: " << lander.forces << endl;
-		//cout << "ofGetFrameRate() * f: " << ofGetFrameRate() * f << endl;
-		//lander.forces += ofGetFrameRate() * f
-		lander.forces += f; //doing it without frame rate to see what happens?
-		//lander.integrate();//Let the update cycle take care of intagrating forces
-
-		//cout << "AFTER ADDITION: " << lander.forces << endl;
-		//cout << "==============================================================================" << endl;
+		lander.forces += ofGetFrameRate() * f;
 	}
 	else
 	{
-		lander.setGravity(ofVec3f(0, -1.0, 0)); //set gravity for the rest of the program
+		lander.setGravity(ofVec3f(0, -gravity, 0)); //set gravity for the rest of the program
 
 	}
 
@@ -286,7 +254,7 @@ void ofApp::checkCollisions() { //TODO: currently this is off of particle positi
 //
 void ofApp::update() 
 {
-	if (timer >= 4500 && !started) { started = true; } //game has started
+	if (timer >= 1000 && !started) { started = true; } //game has started
 	lander.setGravity(ofVec3f(0, -gravity, 0));
 	checkCollisions();
 
@@ -787,7 +755,7 @@ void ofApp::aboveGroundLevel() {
 
 	if (altitude <= 2 && started) { //if you get too close to the ground and the game is currently running, 
 		//find the velocity of the lander, if it's over gravity+somenumber, then it's a hard landing 
-		if (lander.velocity.x >= (-gravity-2)) {
+		if (lander.velocity.x >= (-gravity-20)) {
 			//cout << "greater than gravity" << endl; 
 			gameOver = true; 
 			crashLanding = true; 
@@ -1188,7 +1156,6 @@ void ofApp::setupLights() {
 //--------------------------------------------------------------
 // ran if the player lost in some way (no more fuel, hard landing, crash landing)
 void ofApp::loseCondition() {
-	cout << "lost game" << endl; 
 	gameOver = true; 
 	lander.explodeEmitter.start(); //there is an explosion 
 }
