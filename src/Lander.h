@@ -33,7 +33,7 @@ public:
 	ParticleEmitter explodeEmitter;
 	void explode();
 
-	ofLight light;
+	//ofLight light;
 
 	ofPlanePrimitive plane;
 	ofMaterial planeMaterial;
